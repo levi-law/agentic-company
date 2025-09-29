@@ -28,17 +28,60 @@ This guide explains how to set up your development environment for the Business�
 5. **Database setup** – Provision a **Cloud SQL** instance or **Firestore** database.  For Cloud SQL, create a Postgres instance.  Store connection strings in Secret Manager.  Configure SQL users with strong passwords and minimal privileges.
 6. **Storage** – Create a Cloud Storage bucket for artefacts (documents, CSVs, images).  Enable Object Versioning to track changes.  Assign appropriate roles (`roles/storage.objectAdmin` for writers, `roles/storage.objectViewer` for readers).
 
-## 3. Backend (Python)
+## 3. Business Integration Hub Setup
 
-1. **Environment** – Use Python 3.10+.  Create a virtual environment (`python -m venv venv`) and activate it.
-2. **Dependencies** – Install dependencies via pip:
-   ```bash
-   pip install langchain langgraph fastapi uvicorn[standard] pydantic celery redis pandas numpy matplotlib pytest coverage ruff
+### Third‑Party API Configuration
+1. **Financial Services Integration**
+   ```python
+   # config/integrations/financial.py
+   FINANCIAL_INTEGRATIONS = {
+       'stripe': {
+           'api_key': os.getenv('STRIPE_SECRET_KEY'),
+           'webhook_secret': os.getenv('STRIPE_WEBHOOK_SECRET'),
+           'capabilities': ['payments', 'subscriptions', 'invoicing']
+       },
+       'quickbooks': {
+           'client_id': os.getenv('QB_CLIENT_ID'),
+           'client_secret': os.getenv('QB_CLIENT_SECRET'),
+           'capabilities': ['accounting', 'reporting', 'tax_prep']
+       }
+   }
    ```
-   Install additional packages as needed (OpenAI SDK, vector database clients, search APIs).
-3. **Configuration** – Store environment variables in a `.env` file locally.  Include keys like `OPENAI_API_KEY`, `SERPAPI_API_KEY`, `DATABASE_URL`, `GCP_PROJECT_ID`.  Never commit secrets to the repository.
-4. **Local development** – Run the FastAPI server locally via `uvicorn app.main:app --reload`.  Use Docker Compose if you want to simulate services (Postgres, Redis, etc.) locally.
-5. **Testing** – Write unit tests using `pytest`.  Generate coverage reports (`pytest --cov`).  Run tests automatically with GitHub Actions.  Use tools like `pytest-playwright` for end‑to‑end tests if the backend includes a web UI.
+
+2. **Marketing Platform Integration**
+   ```python
+   # config/integrations/marketing.py
+   MARKETING_INTEGRATIONS = {
+       'google_ads': {
+           'developer_token': os.getenv('GOOGLE_ADS_DEVELOPER_TOKEN'),
+           'client_id': os.getenv('GOOGLE_ADS_CLIENT_ID'),
+           'capabilities': ['campaign_management', 'keyword_research', 'analytics']
+       },
+       'hubspot': {
+           'api_key': os.getenv('HUBSPOT_API_KEY'),
+           'capabilities': ['crm', 'email_marketing', 'lead_tracking']
+       }
+   }
+   ```
+
+### API Gateway Configuration
+```yaml
+# kong/kong.yaml
+_format_version: "3.0"
+services:
+- name: business-integration-hub
+  url: http://integration-service:8000
+  plugins:
+  - name: rate-limiting
+    config:
+      minute: 1000
+      hour: 10000
+  - name: oauth2
+    config:
+      scopes:
+      - business_read
+      - business_write
+```
 
 ## 4. Mobile Client (React Native)
 
@@ -60,12 +103,80 @@ This guide explains how to set up your development environment for the Business�
 - **Vector Database** – Choose a provider (Weaviate Cloud, Pinecone, Chroma).  Obtain credentials and endpoints.  Set environment variables accordingly.
 - **Email and Ads APIs** – If the agent drafts emails or ad campaigns, create service accounts or API keys (e.g. Gmail API, Facebook Ads API).  Because sending emails or ads is a high‑impact action, require explicit user approval before the agent uses these keys.
 
-## 6. Running the System Locally
+## 6. CI/CD Pipeline Setup
 
-1. **Start dependencies** – Spin up Postgres, Redis and other services via Docker Compose.
-2. **Run backend** – Activate the virtual environment and start the FastAPI server.  Start worker processes (Celery or Dramatiq) separately.
-3. **Run mobile app** – Start the Expo development server (`npm start`).  Connect to a simulator or device.
-4. **Agent workflows** – Use a `.env.local` file with dummy API keys for local experimentation.  The system will call the planning agent, spawn tasks and interact with the local worker.
+### GitHub Actions Workflows
+1. **Multi‑Environment Pipeline**
+   ```yaml
+   # .github/workflows/deploy.yml
+   name: Deploy Business Builder
+   on:
+     push:
+       branches: [main]
+   
+   jobs:
+     test:
+       runs-on: ubuntu-latest
+       steps:
+       - uses: actions/checkout@v4
+       - name: Run Agent Tests
+         run: |
+           pytest tests/agents/ --cov=90
+           pytest tests/integrations/ --cov=85
+   
+     deploy-staging:
+       needs: test
+       runs-on: ubuntu-latest
+       steps:
+       - name: Deploy to Staging
+         run: |
+           helm upgrade --install business-builder-staging \
+             ./helm/business-builder \
+             --namespace staging \
+             --set image.tag=${{ github.sha }}
+   
+     deploy-production:
+       needs: deploy-staging
+       runs-on: ubuntu-latest
+       if: github.ref == 'refs/heads/main'
+       steps:
+       - name: Deploy to Production
+         run: |
+           helm upgrade --install business-builder-prod \
+             ./helm/business-builder \
+             --namespace production \
+             --set image.tag=${{ github.sha }}
+   ```
+
+### Helm Chart Configuration
+```yaml
+# helm/business-builder/values.yaml
+image:
+  repository: business-builder/platform
+  tag: latest
+  pullPolicy: IfNotPresent
+
+agentTeams:
+  technical:
+    replicas: 3
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "500m"
+  marketing:
+    replicas: 2
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+
+monitoring:
+  enabled: true
+  prometheus:
+    enabled: true
+  grafana:
+    enabled: true
+```
 
 ## 7. Deployment Checklist
 
