@@ -449,7 +449,7 @@ function App() {
             />
           </div>
           <div>
-            Realtime API <span className="text-gray-500">Agents</span>
+            <span className="text-gray-500">Agentic</span> Company 
           </div>
         </div>
         <div className="flex items-center">
