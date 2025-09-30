@@ -22,6 +22,7 @@ node_modules/
 # Build artifacts that are too large
 .next/trace
 .next/standalone/
+.next/standalone/**/*
 .next/server/chunks/
 
 # Logs
