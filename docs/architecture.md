@@ -1,75 +1,133 @@
 # System Architecture
 
-The Business‑Builder Agent platform delivers complete, production‑ready businesses through a comprehensive architecture spanning strategic planning, autonomous execution, and multi‑domain business operations. The system emphasizes production quality, scalability, security, and end‑to‑end business coverage across technical, marketing, sales, finance, legal, operations, and HR functions.
+The Universal Agent Platform is a comprehensive lifecycle management system where the human user acts as CEO of a dynamic virtual organization. Through continuous conversation, the CEO generates and manages tasks stored in a database, while intelligent agent teams execute work across the entire project lifecycle—from initial planning through live operations and continuous improvement. The system emphasizes database-driven task management, real-time adaptability, and seamless integration of AI agents, remote contractors, and CEO oversight throughout all phases of project evolution.
 
 ## Core Platform Components
 
-| Component | Description | Production Features |
+| Component | Description | Lifecycle Features |
 |---|---|---|
-| **Strategic Planning Interface** | CEO‑level collaborative planning with visual business model canvas, mission breakdown, and strategic decision tools | Real‑time collaboration, version control, approval workflows |
-| **Agent Orchestration Engine** | Coordinates 7 specialized agent teams (Technical, Marketing, Sales, Finance, Legal, Operations, HR) with feedback loops | Load balancing, auto‑scaling, fault tolerance, state persistence |
-| **Multi‑Cloud Infrastructure** | Production‑ready deployment across AWS, GCP, Azure with Terraform/CloudFormation IaC | Blue‑green deployments, disaster recovery, multi‑region failover |
-| **Business Integration Hub** | 100+ third‑party integrations (Stripe, Salesforce, Google Ads, QuickBooks, etc.) | Rate limiting, circuit breakers, webhook management, API versioning |
-| **Quality Assurance System** | Automated testing, compliance checking, performance monitoring for all agent outputs | CI/CD pipelines, security scanning, audit trails, SLA monitoring |
-| **Human‑in‑the‑Loop Interface** | Mobile and web apps for approvals, authentication, and strategic oversight | Push notifications, offline capability, biometric authentication |
-| **Production Monitoring** | Comprehensive observability across business metrics, technical performance, and agent effectiveness | Real‑time dashboards, alerting, log aggregation, performance analytics |
+| **CEO Conversation Engine** | Continuous dialogue system that interprets CEO requests and generates appropriate tasks throughout project lifecycle | Natural language processing, context retention, task generation, strategic guidance |
+| **Task Database & Management** | Comprehensive database storing all tasks as structured objects with full lifecycle tracking and relationships | Task creation, assignment, progress tracking, dependency management, performance analytics |
+| **Dynamic Agent Orchestration** | Intelligent system that assembles and manages agent teams based on current project phase and requirements | Real‑time provisioning, workload balancing, skill matching, cross‑project efficiency |
+| **Lifecycle Phase Management** | System that adapts behavior and priorities based on current project phase (planning, development, launch, operations) | Phase‑specific workflows, milestone tracking, transition management, continuous optimization |
+| **Live Operations Support** | Specialized systems for managing ongoing operations, performance monitoring, and continuous improvement | Real‑time monitoring, automated optimization, issue detection, scaling management |
+| **CEO Command Dashboard** | Comprehensive interface providing CEO with full visibility and control across all project phases | Task visualization, performance metrics, team management, strategic planning tools |
+| **Integration & Automation Hub** | Connects to external services and automates workflows throughout the entire project lifecycle | API management, workflow automation, data synchronization, external service coordination |
 
-## Two‑Phase Architecture Flow
+## Complete Lifecycle Architecture Flow
 
-### Phase 1: Strategic Planning Architecture
-1. **Business Model Canvas**: Interactive planning interface with market analysis, competitive assessment, revenue model design
-{{ ... }}
-### Continuous Operations
-- **Performance Monitoring**: Real‑time tracking of business KPIs, technical metrics, and agent effectiveness
-- **Optimization Loops**: Continuous improvement based on performance data and user feedback
-- **Scaling Management**: Automated resource allocation and capacity planning as business grows
+### Phase 1: Discovery & Strategic Planning
+1. **CEO Conversation**: Natural language dialogue to understand objectives and constraints
+2. **Comprehensive Analysis**: Market research, competitive analysis, resource assessment
+3. **Task Generation**: Automatic creation of structured task objects across all required domains
+4. **Team Assembly**: Dynamic selection of appropriate agent specialists for each task category
+5. **Strategic Approval**: CEO reviews and approves comprehensive project plan and timeline
 
-## Agent Team Architecture
+### Phase 2: Development & Execution
+1. **Parallel Execution**: Multiple agent teams work simultaneously on assigned tasks
+2. **Progress Monitoring**: Real‑time tracking of task completion and quality metrics
+3. **Dynamic Adaptation**: System adjusts plans based on progress, blockers, and new requirements
+4. **CEO Oversight**: Continuous CEO involvement for approvals, decisions, and strategic guidance
+5. **Quality Assurance**: Rigorous validation of all deliverables before progression
 
-### Specialized Agent Teams
-Each team consists of Producer + QA Agent pairs with domain expertise:
+### Phase 3: Launch & Go‑Live
+1. **Launch Coordination**: Synchronized execution of launch tasks across all teams
+2. **Real‑Time Monitoring**: Live system monitoring and immediate issue response
+3. **Performance Validation**: Verification that all systems meet operational requirements
+4. **Stakeholder Communication**: Coordinated communication with customers, partners, and team
+5. **Transition to Operations**: Seamless handoff from development to operational management
 
-**Technical Development Team**
-- Infrastructure: Terraform/CloudFormation, multi‑cloud deployment, CI/CD pipelines
-- Application: Full‑stack development, API design, database architecture
-- Security: Vulnerability scanning, compliance monitoring, access controls
-- Performance: Load testing, optimization, monitoring, scaling
+### Phase 4: Live Operations & Continuous Improvement
+1. **Operational Management**: Ongoing system monitoring, maintenance, and optimization
+2. **Performance Analytics**: Continuous analysis of KPIs and identification of improvement opportunities
+3. **Adaptive Enhancement**: Automatic generation of optimization tasks based on performance data
+4. **Strategic Evolution**: CEO‑driven expansion, pivots, and strategic initiatives
+5. **Lifecycle Continuation**: Perpetual cycle of monitoring, optimization, and strategic development
 
-**Marketing Operations Team**
-- Brand Development: Logo design, brand guidelines, visual identity
-- Content Creation: Website copy, blog posts, social media content
-- Campaign Management: SEO/SEM, email marketing, social media automation
-- Analytics: Performance tracking, A/B testing, conversion optimization
+## Dynamic Agent Ecosystem
 
-**Sales Execution Team**
-- CRM Management: Lead tracking, pipeline management, customer data
-- Funnel Optimization: Conversion rate improvement, nurturing sequences
-- Proposal Generation: Automated proposals, contract templates, e‑signatures
-- Performance Analysis: Sales metrics, forecasting, territory management
+### Dynamic Agent Pool Architecture
+The platform maintains an extensive library of specialized agents that are dynamically selected and assembled based on user goals:
 
-**Finance & Accounting Team**
-- Bookkeeping: Automated transaction processing, reconciliation, reporting
-- Financial Planning: Budgeting, forecasting, investor relations
-- Tax Management: Quarterly filings, compliance, audit preparation
-- Payment Processing: Invoicing, collections, merchant services
+#### Example Agent Compositions by Use Case
 
-**Legal & Compliance Team**
-- Entity Formation: Business registration, corporate governance, banking setup
-- Contract Management: Terms of service, privacy policies, employment agreements
-- IP Protection: Trademark registration, copyright management
-- Regulatory Compliance: GDPR/CCPA, industry regulations, risk assessment
+**Entrepreneur Building E‑Commerce Business**
+- Business Strategy Agent, Market Research Agent, E‑Commerce Developer, Payment Integration Specialist, Digital Marketing Agent, SEO Specialist, Legal Compliance Agent, Financial Planning Agent, Customer Service Agent
 
-**Operations Management Team**
-- Process Documentation: SOPs, workflow optimization, quality standards
-- Vendor Management: Supplier relationships, contract negotiations
-- Customer Support: Help desk, knowledge base, ticket management
-- Quality Assurance: Performance monitoring, process improvement
+**Student Conducting Academic Research**
+- Research Methodology Agent, Data Scientist, Literature Review Agent, Statistical Analysis Agent, Academic Writer, Citation Manager, Peer Review Agent, Presentation Designer
 
-**Human Resources Team**
-- Recruitment: Job posting, candidate screening, interview coordination
-- Onboarding: Employee handbook, training programs, system access
-- Performance Management: Reviews, goal setting, career development
-- Compliance: Labor law adherence, policy enforcement, documentation
+**Consultant Delivering Client Project**
+- Project Manager Agent, Industry Expert Agent, Data Analyst, Report Writer, Presentation Designer, Client Communication Agent, Quality Assurance Agent
+
+**Startup Building SaaS Platform**
+- Product Manager Agent, Full‑Stack Developer, DevOps Engineer, UI/UX Designer, Growth Hacker, Customer Success Agent, Investor Relations Agent, Legal Tech Agent
+
+**Healthcare Practice Setup**
+- Healthcare Business Agent, Medical Compliance Specialist, HIPAA Expert, Medical Billing Agent, Patient Management System Specialist, Healthcare Marketing Agent, Medical Legal Agent
+
+**Content Creator Monetizing Platform**
+- Content Strategy Agent, Video Production Agent, Social Media Manager, Monetization Specialist, Brand Partnership Agent, Analytics Agent, Copyright Agent
+
+#### Agent Specialization Categories
+
+**Technical Specialists**
+- Full‑Stack Developers, Mobile App Developers, DevOps Engineers, Database Architects, Security Specialists, AI/ML Engineers, Blockchain Developers, IoT Specialists
+
+**Business & Strategy**
+- Business Analysts, Market Researchers, Financial Planners, Investment Advisors, Operations Managers, Supply Chain Specialists, Risk Analysts
+
+**Creative & Content**
+- Graphic Designers, Video Producers, Content Writers, Social Media Managers, Brand Strategists, UX/UI Designers, Photographers
+
+**Legal & Compliance**
+- Corporate Lawyers, IP Attorneys, Compliance Officers, Contract Specialists, Regulatory Experts, Privacy Officers, Employment Law Specialists
+
+**Marketing & Sales**
+- Digital Marketers, SEO Specialists, PPC Managers, Sales Funnel Experts, CRM Specialists, Email Marketing Agents, Influencer Relations
+
+**Research & Analytics**
+- Data Scientists, Research Methodologists, Statistical Analysts, Market Researchers, Academic Researchers, Patent Researchers, Competitive Intelligence
+
+**Specialized Domains**
+- Healthcare Specialists, Financial Services Experts, Education Specialists, Real Estate Agents, Manufacturing Experts, Logistics Specialists
+
+### Dynamic Team Assembly Process
+
+#### 1. Goal Analysis & Agent Selection
+```python
+# Example: User says "I want to research sustainable energy solutions for my thesis"
+user_goal = "Research sustainable energy solutions for academic thesis"
+
+# AI analyzes and identifies required expertise
+required_agents = [
+    "Research Methodology Agent",
+    "Environmental Science Specialist", 
+    "Energy Technology Expert",
+    "Data Analysis Agent",
+    "Academic Writing Agent",
+    "Literature Review Agent",
+    "Statistical Analysis Agent",
+    "Citation Management Agent",
+    "Peer Review Agent"
+]
+
+# System estimates resources and timeline
+estimated_timeline = "6-8 weeks"
+estimated_cost = "$200-400"
+```
+
+#### 2. Intelligent Agent Matching
+- **Skill‑Based Selection**: Agents chosen based on specific expertise requirements
+- **Workload Balancing**: Available agents selected to optimize response times
+- **Cross‑Project Reuse**: Agents can work on multiple compatible projects simultaneously
+- **Specialization Depth**: System selects agents with appropriate level of expertise
+
+#### 3. Dynamic Team Scaling
+- **Adaptive Sizing**: Teams grow or shrink based on project complexity
+- **Real‑Time Adjustment**: New agents added when unexpected requirements emerge
+- **Resource Optimization**: Unused agents released to work on other projects
+- **Expertise Escalation**: More specialized agents brought in for complex challenges
 
 ### Memory and Knowledge Management
 - **Business Context**: Company‑specific knowledge, decisions, and historical data

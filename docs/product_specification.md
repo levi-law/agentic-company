@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-The **Business-Builder Agent** is a comprehensive AI-powered platform that transforms entrepreneurial ideas into fully operational, production-ready businesses. Unlike MVP or POC solutions, this system delivers complete business infrastructure across all domains: technical, financial, legal, operational, marketing, and sales.
+The **Business-Builder Agent** is a universal AI-powered platform that transforms entrepreneurial ideas into fully operational, production-ready businesses of any type. Whether creating e-commerce stores, SaaS platforms, consulting firms, healthcare practices, local services, manufacturing companies, or any other business model, this system delivers complete business infrastructure across all domains: technical, financial, legal, operational, marketing, and sales. Unlike MVP or POC solutions, this platform creates businesses ready for immediate operation and scaling.
 
 The platform operates in two distinct phases:
 1. **Planning Phase**: CEO-level strategic planning with human-AI collaboration

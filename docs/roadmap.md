@@ -1,6 +1,6 @@
-# Project roadmap
+# Project Roadmap
 
-This roadmap outlines the development phases for delivering the complete Business‑Builder Agent platform—a comprehensive system that transforms entrepreneurial ideas into fully operational, production‑ready businesses across all domains: technical, marketing, sales, finance, legal, operations, and HR.
+This roadmap outlines the development phases for delivering the complete Business‑Builder Agent platform—a universal system that transforms entrepreneurial ideas into fully operational, production‑ready businesses of any type. Whether creating e‑commerce stores, SaaS platforms, consulting firms, healthcare practices, local services, or any other business model, the platform covers all domains: technical, marketing, sales, finance, legal, operations, and HR.
 
 ## Phase 1: Foundation & Core Platform (Months 1‑6)
 
@@ -10,11 +10,11 @@ This roadmap outlines the development phases for delivering the complete Busines
 3. **Agent Orchestration Engine**: LangChain/LangGraph framework with state management and feedback loops
 4. **Security Foundation**: IAM, encryption, audit logging, compliance frameworks (SOC 2, GDPR)
 
-### Strategic Planning Interface
-1. **Business Model Canvas**: Interactive planning interface with market analysis tools
-2. **Mission Decomposition**: AI‑powered task breakdown and resource planning
-3. **Collaboration Tools**: Real‑time planning with version control and approval workflows
-4. **Strategic Validation**: Cross‑functional review system for business plans
+### Universal Strategic Planning Interface
+1. **Industry‑Agnostic Business Model Canvas**: Interactive planning supporting any business type with industry‑specific templates
+2. **Intelligent Mission Decomposition**: AI‑powered task breakdown adapting to business model (B2B, B2C, service, product, local, global)
+3. **Multi‑Industry Collaboration Tools**: Real‑time planning with industry templates, version control, and approval workflows
+4. **Cross‑Industry Strategic Validation**: Review system adapting to different business models and regulatory requirements
 
 ### Basic Agent Teams
 1. **Planning Agent**: CEO‑level strategic planning and mission breakdown
