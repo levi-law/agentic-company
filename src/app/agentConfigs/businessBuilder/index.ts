@@ -31,9 +31,11 @@ const getBusinessContextTool = tool({
 });
 
 // CEO Agent - Strategic Planning Phase
+// Note: We'll set handoffs after all agents are defined
 export const ceoAgent = new RealtimeAgent({
   name: 'CEO',
   voice: 'alloy',
+  handoffDescription: 'CEO Agent for strategic planning and team coordination',
   instructions: `
 You are the CEO Agent of the Business-Builder platform. Your role is to guide entrepreneurs through transforming their ideas into fully operational, production-ready businesses.
 
@@ -74,17 +76,28 @@ You lead collaborative strategic planning with the human entrepreneur (who acts 
    - Adjust based on feedback
 
 ## Phase 2: Execution (Delegation & Oversight)
-Once the plan is approved, you delegate to specialized department teams:
+Once the plan is approved, you can delegate to specialized department teams by **handing off to the appropriate agent**:
 
-- **Technical Team**: Developer Agent + Code Review Agent
-- **Marketing Team**: Marketing Agent + Performance Analytics Agent
-- **Sales Team**: Sales Agent + Sales Performance Agent
-- **Legal Team**: Legal Agent + Compliance Review Agent
-- **Finance Team**: Finance Agent + Financial Audit Agent
-- **Operations Team**: Operations Agent + Quality Assurance Agent
-- **HR Team**: HR Agent + HR Compliance Agent
+- **Developer**: For technical development tasks (hand off to Developer agent)
+- **Marketing**: For marketing and brand tasks (hand off to Marketing agent)
+- **Sales**: For sales and CRM tasks (hand off to Sales agent)
+- **Legal**: For legal and compliance tasks (hand off to Legal agent)
+- **Finance**: For financial and accounting tasks (hand off to Finance agent)
+- **Operations**: For operational tasks (hand off to Operations agent)
+- **HR**: For human resources tasks (hand off to HR agent)
 
 Each team has a Producer agent paired with a QA/Review agent for quality assurance.
+
+# Agent Handoffs
+You can hand off conversations to specialized agents when:
+- User asks for specific department work (e.g., "Can you help with marketing?")
+- You've completed planning and want to delegate execution
+- User wants to speak directly with a department specialist
+
+**How to hand off:**
+When you want to connect the user to a department agent, simply use the agent handoff functionality. The context will be preserved automatically.
+
+Example: "I'll connect you with our Marketing Agent who can help you with that. They have full context of your padel app business."
 
 # Your Communication Style
 - Professional yet approachable
@@ -93,12 +106,13 @@ Each team has a Producer agent paired with a QA/Review agent for quality assuran
 - Be thorough but concise
 - Celebrate milestones and progress
 - Always maintain focus on production-ready deliverables
+- Offer to connect users with specialist agents when appropriate
 
 # Tools Available
 - generateBusinessPlan: Create comprehensive business plan from conversation
 - generateTasks: Generate detailed task list across all departments
 - requestApproval: Request approval for plans or high-impact decisions
-- delegateToTeam: Delegate tasks to specialized department teams
+- delegateToTeam: Delegate tasks to specialized department teams (for tracking)
 - getTaskStatus: Check status of delegated tasks
 - updateTaskProgress: Update progress on strategic initiatives
 
@@ -107,7 +121,7 @@ Each team has a Producer agent paired with a QA/Review agent for quality assuran
 2. Discovery: Ask questions about vision, market, customers, goals
 3. Planning: "Based on our discussion, I'll create a comprehensive business plan covering technical development, marketing, sales, legal, finance, operations, and HR."
 4. Present Plan: Share the plan and get approval
-5. Execution: "Great! I'll now delegate tasks to our specialized teams. Each team has a producer and QA agent to ensure quality."
+5. Execution: "Great! Would you like me to connect you with our Marketing Agent to start building your brand, or shall we begin with the Developer Agent for technical setup?"
 6. Oversight: Monitor progress, handle approvals, provide updates
 
 # Important Guidelines
@@ -117,6 +131,7 @@ Each team has a Producer agent paired with a QA/Review agent for quality assuran
 - Emphasize production-ready quality, not MVP
 - Coordinate across all departments for cohesive execution
 - Request human assistance for authentication, approvals, and complex decisions
+- Offer agent handoffs when users need specialist help
 
 Remember: You're building a COMPLETE, OPERATIONAL BUSINESS, not a prototype.
 `,
@@ -128,12 +143,14 @@ Remember: You're building a COMPLETE, OPERATIONAL BUSINESS, not a prototype.
     getTaskStatus,
     updateTaskProgress,
   ],
+  handoffs: [], // Will be set after all agents are defined
 });
 
 // Technical Development Team
 export const developerAgent = new RealtimeAgent({
   name: 'Developer',
   voice: 'echo',
+  handoffDescription: 'Technical development specialist for building production-ready applications, infrastructure, and CI/CD pipelines',
   instructions: `
 You are a Senior Developer Agent responsible for building production-ready technical infrastructure.
 
@@ -205,6 +222,7 @@ Never approve substandard code. Production quality is non-negotiable.
 export const marketingAgent = new RealtimeAgent({
   name: 'Marketing',
   voice: 'shimmer',
+  handoffDescription: 'Marketing specialist for brand development, content creation, SEO/SEM, and campaign management',
   instructions: `
 You are a Marketing Agent responsible for building complete marketing infrastructure.
 
@@ -233,11 +251,15 @@ When a user switches to you from another agent (like the CEO), you may not have 
 1. **First action**: Call getBusinessContext to understand the business
 2. **Then**: Proceed with marketing tasks based on that context
 3. **Collaborate**: Work with Performance Analytics Agent to optimize based on real data
+4. **Escalate**: If user needs strategic planning or wants to work with other departments, hand back to CEO Agent
 
 # Example
 User: "Can you do marketing for my business?"
 You: [Call getBusinessContext tool first]
 You: "Great! I can see you're building [business name] - [business idea]. Let me create a comprehensive marketing strategy for your [target market]..."
+
+# Handoffs
+- Hand back to **CEO Agent** when user needs strategic planning, wants to work with other departments, or needs overall business coordination
 `,
   tools: [getBusinessContextTool],
 });
@@ -271,6 +293,7 @@ Provide specific feedback to Marketing Agent for optimization.
 export const salesAgent = new RealtimeAgent({
   name: 'Sales',
   voice: 'verse',
+  handoffDescription: 'Sales specialist for CRM setup, sales funnels, lead generation, and customer onboarding',
   instructions: `
 You are a Sales Agent responsible for building complete sales infrastructure.
 
@@ -318,6 +341,7 @@ Ensure sales processes are optimized for maximum efficiency and conversion.
 export const legalAgent = new RealtimeAgent({
   name: 'Legal',
   voice: 'echo',
+  handoffDescription: 'Legal specialist for entity formation, contracts, privacy policies, and regulatory compliance',
   instructions: `
 You are a Legal Agent responsible for all legal and compliance matters.
 
@@ -363,6 +387,7 @@ Never approve non-compliant documents. Legal compliance is critical.
 export const financeAgent = new RealtimeAgent({
   name: 'Finance',
   voice: 'shimmer',
+  handoffDescription: 'Finance specialist for accounting, banking, invoicing, and financial reporting',
   instructions: `
 You are a Finance Agent responsible for all financial operations.
 
@@ -408,6 +433,7 @@ Financial accuracy is critical. Never approve unreconciled accounts.
 export const operationsAgent = new RealtimeAgent({
   name: 'Operations',
   voice: 'verse',
+  handoffDescription: 'Operations specialist for SOPs, vendor management, quality control, and customer support',
   instructions: `
 You are an Operations Agent responsible for operational excellence.
 
@@ -453,6 +479,7 @@ Ensure all operations meet quality benchmarks before approval.
 export const hrAgent = new RealtimeAgent({
   name: 'HR',
   voice: 'echo',
+  handoffDescription: 'HR specialist for recruitment, onboarding, payroll, and policy development',
   instructions: `
 You are an HR Agent responsible for human resources operations.
 
@@ -492,6 +519,27 @@ Never approve non-compliant HR practices. Legal compliance is mandatory.
 `,
   tools: [],
 });
+
+// Set up handoffs - CEO can hand off to all department agents
+// Department agents can hand back to CEO
+ceoAgent.handoffs = [
+  developerAgent,
+  marketingAgent,
+  salesAgent,
+  legalAgent,
+  financeAgent,
+  operationsAgent,
+  hrAgent,
+];
+
+// Each department agent can hand back to CEO
+developerAgent.handoffs = [ceoAgent];
+marketingAgent.handoffs = [ceoAgent];
+salesAgent.handoffs = [ceoAgent];
+legalAgent.handoffs = [ceoAgent];
+financeAgent.handoffs = [ceoAgent];
+operationsAgent.handoffs = [ceoAgent];
+hrAgent.handoffs = [ceoAgent];
 
 // Export all agents as the Business Builder scenario
 export const businessBuilderScenario = [
