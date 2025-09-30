@@ -1,4 +1,5 @@
-# Security headers for all pages
+# Security headers for all pages - Updated 2025-09-30
+# Note: Permissions-Policy removed to allow microphone access
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
