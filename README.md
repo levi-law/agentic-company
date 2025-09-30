@@ -1,6 +1,49 @@
-# Realtime API Agents Demo
+# Business-Builder Agent Platform
 
-This is a demonstration of more advanced patterns for voice agents, using the OpenAI Realtime API and the OpenAI Agents SDK. 
+An AI-powered platform that transforms entrepreneurial ideas into fully operational, production-ready businesses using the OpenAI Realtime API and the OpenAI Agents SDK.
+
+## Overview
+
+The **Business-Builder Agent** is a comprehensive platform that creates complete business infrastructure across all domains: technical, financial, legal, operational, marketing, and sales. Unlike MVP or POC solutions, this platform delivers production-ready businesses.
+
+### Two-Phase Operation Model
+
+1. **Planning Phase**: CEO-level strategic planning with human-AI collaboration
+2. **Execution Phase**: Autonomous agent teams with human assistance for authentication, approvals, and complex decisions
+
+### Agent Team Architecture
+
+Every production agent is paired with a QA/Review agent for quality assurance:
+- **Technical Team**: Developer + Code Review Agent
+- **Marketing Team**: Marketing + Performance Analytics Agent
+- **Sales Team**: Sales + Sales Performance Agent
+- **Legal Team**: Legal + Compliance Review Agent
+- **Finance Team**: Finance + Financial Audit Agent
+- **Operations Team**: Operations + Quality Assurance Agent
+- **HR Team**: HR + HR Compliance Agent
+
+## Quick Start
+
+1. Install dependencies: `npm i`
+2. Add your `OPENAI_API_KEY` to `.env` (copy from `.env.sample`)
+3. Start the server: `npm run dev`
+4. Open [http://localhost:3000](http://localhost:3000)
+5. Select "businessBuilder" from the Scenario dropdown
+6. Connect and describe your business idea to the CEO Agent
+
+## What You Get
+
+A complete, operational business with:
+- **Live Production Systems**: Working application with cloud deployment, monitoring, and security
+- **Business Infrastructure**: Financial systems, legal framework, marketing engine, sales pipeline
+- **Technology Stack**: Source code repository with CI/CD, Infrastructure as Code, monitoring
+- **Growth-Ready Platform**: Performance dashboards, scaling playbooks, investor materials
+
+---
+
+# Original Realtime API Agents Demo
+
+This project also demonstrates advanced patterns for voice agents using the OpenAI Realtime API and the OpenAI Agents SDK. 
 
 ## About the OpenAI Agents SDK
 
