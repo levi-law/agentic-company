@@ -19,11 +19,17 @@ node_modules/
 .git/
 .gitignore
 
-# Build artifacts that are too large
+# Large build artifacts to exclude (keep essential files)
 .next/trace
 .next/standalone/
 .next/standalone/**/*
-.next/server/chunks/
+
+# Keep essential files for Pages deployment:
+# .next/static/ - static assets (CSS, JS, images)
+# .next/server/ - server-side files needed for SSR
+# But exclude large chunks that aren't needed
+.next/server/chunks/[0-9]*.js
+.next/server/chunks/[0-9]*.js.map
 
 # Logs
 *.log

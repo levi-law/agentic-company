@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
   },
   
   // Configure output for Cloudflare Pages with server support
-  output: process.env.CF_PAGES ? undefined : 'standalone',
+  // Keep default output for full-stack Next.js with API routes
   
   // Security headers
   async headers() {
