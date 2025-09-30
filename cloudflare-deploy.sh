@@ -83,9 +83,9 @@ cp .next/server/app/_not-found.html .next/404.html 2>/dev/null || true
 print_success "Build completed successfully!"
 
 # Load Cloudflare configuration
-if [ -f "../.env.cloudflare" ]; then
+if [ -f ".env.cloudflare" ]; then
     print_status "Loading Cloudflare configuration..."
-    source ../.env.cloudflare
+    source .env.cloudflare
     export CLOUDFLARE_API_TOKEN
     export CLOUDFLARE_API_KEY
     export CLOUDFLARE_EMAIL
