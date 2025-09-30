@@ -11,6 +11,8 @@ interface BottomToolbarProps {
   handleTalkButtonUp: () => void;
   isEventsPaneExpanded: boolean;
   setIsEventsPaneExpanded: (val: boolean) => void;
+  isTasksViewExpanded?: boolean;
+  setIsTasksViewExpanded?: (val: boolean) => void;
   isAudioPlaybackEnabled: boolean;
   setIsAudioPlaybackEnabled: (val: boolean) => void;
   codec: string;
@@ -27,6 +29,8 @@ function BottomToolbar({
   handleTalkButtonUp,
   isEventsPaneExpanded,
   setIsEventsPaneExpanded,
+  isTasksViewExpanded,
+  setIsTasksViewExpanded,
   isAudioPlaybackEnabled,
   setIsAudioPlaybackEnabled,
   codec,
@@ -113,6 +117,19 @@ function BottomToolbar({
           className="flex items-center cursor-pointer"
         >
           Audio playback
+        </label>
+      </div>
+
+      <div className="flex flex-row items-center gap-2">
+        <input
+          id="tasks"
+          type="checkbox"
+          checked={isTasksViewExpanded}
+          onChange={(e) => setIsTasksViewExpanded?.(e.target.checked)}
+          className="w-4 h-4"
+        />
+        <label htmlFor="tasks" className="flex items-center cursor-pointer">
+          Tasks
         </label>
       </div>
 

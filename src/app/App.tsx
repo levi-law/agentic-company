@@ -9,6 +9,7 @@ import Image from "next/image";
 import Transcript from "./components/Transcript";
 import Events from "./components/Events";
 import BottomToolbar from "./components/BottomToolbar";
+import TasksView from "./components/TasksView";
 
 // Types
 import { SessionStatus } from "@/app/types";
@@ -108,6 +109,8 @@ function App() {
     useState<SessionStatus>("DISCONNECTED");
 
   const [isEventsPaneExpanded, setIsEventsPaneExpanded] =
+    useState<boolean>(true);
+  const [isTasksViewExpanded, setIsTasksViewExpanded] =
     useState<boolean>(true);
   const [userText, setUserText] = useState<string>("");
   const [isPTTActive, setIsPTTActive] = useState<boolean>(false);
@@ -363,6 +366,10 @@ function App() {
     if (storedLogsExpanded) {
       setIsEventsPaneExpanded(storedLogsExpanded === "true");
     }
+    const storedTasksViewExpanded = localStorage.getItem("tasksViewExpanded");
+    if (storedTasksViewExpanded) {
+      setIsTasksViewExpanded(storedTasksViewExpanded === "true");
+    }
     const storedAudioPlaybackEnabled = localStorage.getItem(
       "audioPlaybackEnabled"
     );
@@ -378,6 +385,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem("logsExpanded", isEventsPaneExpanded.toString());
   }, [isEventsPaneExpanded]);
+
+  useEffect(() => {
+    localStorage.setItem("tasksViewExpanded", isTasksViewExpanded.toString());
+  }, [isTasksViewExpanded]);
 
   useEffect(() => {
     localStorage.setItem(
@@ -530,6 +541,8 @@ function App() {
           }
         />
 
+        <TasksView isExpanded={isTasksViewExpanded} />
+
         <Events isExpanded={isEventsPaneExpanded} />
       </div>
 
@@ -543,6 +556,8 @@ function App() {
         handleTalkButtonUp={handleTalkButtonUp}
         isEventsPaneExpanded={isEventsPaneExpanded}
         setIsEventsPaneExpanded={setIsEventsPaneExpanded}
+        isTasksViewExpanded={isTasksViewExpanded}
+        setIsTasksViewExpanded={setIsTasksViewExpanded}
         isAudioPlaybackEnabled={isAudioPlaybackEnabled}
         setIsAudioPlaybackEnabled={setIsAudioPlaybackEnabled}
         codec={urlCodec}
