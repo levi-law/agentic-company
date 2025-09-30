@@ -16,7 +16,6 @@ NC='\033[0m' # No Color
 
 # Configuration
 PROJECT_NAME="agentic-company-app"
-BUILD_DIR="openai-realtime-agents"
 OUTPUT_DIR="out"
 
 # Function to print colored output
@@ -35,12 +34,6 @@ print_warning() {
 print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
-
-# Check if we're in the right directory
-if [ ! -f "openai-realtime-agents/package.json" ]; then
-    print_error "Please run this script from the project root directory"
-    exit 1
-fi
 
 # Check if Wrangler is installed
 if ! command -v wrangler &> /dev/null; then

@@ -12,7 +12,6 @@ This guide explains how to set up the Business-Builder Agent platform by extendi
 ### Initial Setup
 1. **Navigate to the OpenAI Realtime Agents directory**:
    ```bash
-   cd openai-realtime-agents
    npm install
    ```
 
