@@ -1,4 +1,5 @@
 import { tool } from '@openai/agents/realtime';
+import { updateBusinessContext } from './sharedContext';
 
 // In-memory storage for business plans, tasks, and approvals
 // In production, this would be a database
@@ -103,6 +104,19 @@ export const generateBusinessPlan = tool({
     };
 
     businessPlans.set(businessId, plan);
+
+    // Update shared context so other agents can access this information
+    updateBusinessContext({
+      businessId,
+      businessName,
+      businessIdea,
+      targetMarket,
+      revenueModel,
+      timeline: timeline || '90 days',
+      budget: budget || 'To be determined',
+      currentPhase: 'planning',
+      conversationSummary: `Building ${businessName}: ${businessIdea}. Target: ${targetMarket}. Revenue: ${revenueModel}. Timeline: ${timeline || '90 days'}. Budget: ${budget || 'TBD'}.`,
+    });
 
     const addBreadcrumb = (details?.context as any)?.addTranscriptBreadcrumb;
     if (addBreadcrumb) {

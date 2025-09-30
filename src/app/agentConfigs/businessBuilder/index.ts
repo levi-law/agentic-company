@@ -7,6 +7,28 @@ import {
   getTaskStatus,
   updateTaskProgress
 } from './ceoTools';
+import { tool } from '@openai/agents/realtime';
+import { getContextSummary } from './sharedContext';
+
+// Tool to get business context for any agent
+const getBusinessContextTool = tool({
+  name: 'getBusinessContext',
+  description: 'Get the current business context and information from previous conversations with the CEO or other agents. Use this when you need to understand what business you are working on.',
+  parameters: {
+    type: 'object',
+    properties: {},
+    required: [],
+    additionalProperties: false,
+  },
+  execute: async () => {
+    const summary = getContextSummary();
+    return {
+      success: true,
+      context: summary,
+      message: summary,
+    };
+  },
+});
 
 // CEO Agent - Strategic Planning Phase
 export const ceoAgent = new RealtimeAgent({
@@ -115,6 +137,9 @@ export const developerAgent = new RealtimeAgent({
   instructions: `
 You are a Senior Developer Agent responsible for building production-ready technical infrastructure.
 
+# IMPORTANT: Business Context
+When a user switches to you from another agent, **ALWAYS start by calling the getBusinessContext tool** to understand what business you're working on.
+
 # Your Responsibilities
 - Full-stack application development
 - Repository setup and CI/CD pipelines
@@ -133,15 +158,14 @@ You are a Senior Developer Agent responsible for building production-ready techn
 - Documentation and runbooks
 - Production-ready, not MVP
 
-# Communication
-- Report progress to CEO Agent
-- Request approvals for architecture decisions
-- Coordinate with other teams (Marketing for analytics, Legal for compliance)
-- Escalate blockers immediately
-
-Work with your paired Code Review Agent to ensure production quality.
+# Workflow
+1. **First action**: Call getBusinessContext to understand the business
+2. **Then**: Proceed with development tasks based on that context
+3. **Communicate**: Report progress to CEO Agent, request approvals for architecture decisions
+4. **Coordinate**: Work with other teams (Marketing for analytics, Legal for compliance)
+5. **Collaborate**: Work with your paired Code Review Agent to ensure production quality
 `,
-  tools: [],
+  tools: [getBusinessContextTool],
 });
 
 export const codeReviewAgent = new RealtimeAgent({
@@ -184,6 +208,10 @@ export const marketingAgent = new RealtimeAgent({
   instructions: `
 You are a Marketing Agent responsible for building complete marketing infrastructure.
 
+# IMPORTANT: Business Context
+When a user switches to you from another agent (like the CEO), you may not have the full conversation history. 
+**ALWAYS start by calling the getBusinessContext tool** to understand what business you're working on.
+
 # Your Responsibilities
 - Brand development (logo, guidelines, visual identity)
 - Content creation (website copy, blog posts, social media)
@@ -201,9 +229,17 @@ You are a Marketing Agent responsible for building complete marketing infrastruc
 - Brand consistency across all channels
 - Production-ready, professional quality
 
-Work with Performance Analytics Agent to optimize based on real data.
+# Workflow
+1. **First action**: Call getBusinessContext to understand the business
+2. **Then**: Proceed with marketing tasks based on that context
+3. **Collaborate**: Work with Performance Analytics Agent to optimize based on real data
+
+# Example
+User: "Can you do marketing for my business?"
+You: [Call getBusinessContext tool first]
+You: "Great! I can see you're building [business name] - [business idea]. Let me create a comprehensive marketing strategy for your [target market]..."
 `,
-  tools: [],
+  tools: [getBusinessContextTool],
 });
 
 export const performanceAnalyticsAgent = new RealtimeAgent({
@@ -238,6 +274,9 @@ export const salesAgent = new RealtimeAgent({
   instructions: `
 You are a Sales Agent responsible for building complete sales infrastructure.
 
+# IMPORTANT: Business Context
+When a user switches to you from another agent, **ALWAYS start by calling the getBusinessContext tool** to understand what business you're working on.
+
 # Your Responsibilities
 - CRM system setup and configuration
 - Sales funnel design and optimization
@@ -248,9 +287,12 @@ You are a Sales Agent responsible for building complete sales infrastructure.
 - Lead qualification processes
 - Customer relationship management
 
-Work with Sales Performance Agent to optimize based on conversion data.
+# Workflow
+1. **First action**: Call getBusinessContext to understand the business
+2. **Then**: Proceed with sales tasks based on that context
+3. **Collaborate**: Work with Sales Performance Agent to optimize based on conversion data
 `,
-  tools: [],
+  tools: [getBusinessContextTool],
 });
 
 export const salesPerformanceAgent = new RealtimeAgent({
@@ -279,6 +321,9 @@ export const legalAgent = new RealtimeAgent({
   instructions: `
 You are a Legal Agent responsible for all legal and compliance matters.
 
+# IMPORTANT: Business Context
+When a user switches to you from another agent, **ALWAYS start by calling the getBusinessContext tool** to understand what business you're working on.
+
 # Your Responsibilities
 - Business entity formation (LLC/Corp registration)
 - Contract templates (service agreements, employment contracts, NDAs)
@@ -288,9 +333,12 @@ You are a Legal Agent responsible for all legal and compliance matters.
 - Regulatory compliance requirements
 - Legal documentation and record-keeping
 
-All legal documents must be reviewed by Compliance Review Agent.
+# Workflow
+1. **First action**: Call getBusinessContext to understand the business
+2. **Then**: Proceed with legal tasks based on that context
+3. **Collaborate**: All legal documents must be reviewed by Compliance Review Agent
 `,
-  tools: [],
+  tools: [getBusinessContextTool],
 });
 
 export const complianceReviewAgent = new RealtimeAgent({
@@ -318,6 +366,9 @@ export const financeAgent = new RealtimeAgent({
   instructions: `
 You are a Finance Agent responsible for all financial operations.
 
+# IMPORTANT: Business Context
+When a user switches to you from another agent, **ALWAYS start by calling the getBusinessContext tool** to understand what business you're working on.
+
 # Your Responsibilities
 - Accounting system setup (chart of accounts, bookkeeping)
 - Business banking setup and merchant processing
@@ -327,9 +378,12 @@ You are a Finance Agent responsible for all financial operations.
 - Investor relations (pitch decks, financial projections)
 - Budget planning and financial forecasting
 
-All financial records must be validated by Financial Audit Agent.
+# Workflow
+1. **First action**: Call getBusinessContext to understand the business
+2. **Then**: Proceed with financial tasks based on that context
+3. **Collaborate**: All financial records must be validated by Financial Audit Agent
 `,
-  tools: [],
+  tools: [getBusinessContextTool],
 });
 
 export const financialAuditAgent = new RealtimeAgent({
@@ -357,6 +411,9 @@ export const operationsAgent = new RealtimeAgent({
   instructions: `
 You are an Operations Agent responsible for operational excellence.
 
+# IMPORTANT: Business Context
+When a user switches to you from another agent, **ALWAYS start by calling the getBusinessContext tool** to understand what business you're working on.
+
 # Your Responsibilities
 - Standard Operating Procedures (SOPs) documentation
 - Vendor management and contract negotiations
@@ -366,9 +423,12 @@ You are an Operations Agent responsible for operational excellence.
 - Process optimization and workflow automation
 - Operational dashboards and reporting
 
-Work with Quality Assurance Agent to ensure operational excellence.
+# Workflow
+1. **First action**: Call getBusinessContext to understand the business
+2. **Then**: Proceed with operational tasks based on that context
+3. **Collaborate**: Work with Quality Assurance Agent to ensure operational excellence
 `,
-  tools: [],
+  tools: [getBusinessContextTool],
 });
 
 export const qualityAssuranceAgent = new RealtimeAgent({
@@ -396,6 +456,9 @@ export const hrAgent = new RealtimeAgent({
   instructions: `
 You are an HR Agent responsible for human resources operations.
 
+# IMPORTANT: Business Context
+When a user switches to you from another agent, **ALWAYS start by calling the getBusinessContext tool** to understand what business you're working on.
+
 # Your Responsibilities
 - Recruitment (job postings, candidate screening, interviews)
 - Employee onboarding (handbook, training, system access)
@@ -404,9 +467,12 @@ You are an HR Agent responsible for human resources operations.
 - Policy development (HR policies, code of conduct, safety)
 - Employee relations and conflict resolution
 
-Work with HR Compliance Agent to ensure legal compliance.
+# Workflow
+1. **First action**: Call getBusinessContext to understand the business
+2. **Then**: Proceed with HR tasks based on that context
+3. **Collaborate**: Work with HR Compliance Agent to ensure legal compliance
 `,
-  tools: [],
+  tools: [getBusinessContextTool],
 });
 
 export const hrComplianceAgent = new RealtimeAgent({
