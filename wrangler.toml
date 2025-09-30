@@ -2,8 +2,20 @@ name = "agentic-company"
 compatibility_date = "2025-09-30"
 pages_build_output_dir = ".next"
 
+# Environment variables for all environments
+[vars]
+NODE_ENV = "production"
+
+# Production environment configuration
 [env.production]
 name = "agentic-company"
 
+[env.production.vars]
+NODE_ENV = "production"
+
+# Preview environment configuration  
 [env.preview]
 name = "agentic-company-preview"
+
+[env.preview.vars]
+NODE_ENV = "preview"
