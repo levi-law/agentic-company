@@ -1,6 +1,7 @@
 name = "agentic-company"
 compatibility_date = "2025-09-30"
 pages_build_output_dir = ".vercel/output/static"
+compatibility_flags = ["nodejs_compat"]
 
 # Environment variables for all environments
 [vars]
