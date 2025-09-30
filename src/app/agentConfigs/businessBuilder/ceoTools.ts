@@ -7,6 +7,90 @@ const businessPlans = new Map<string, any>();
 const tasks = new Map<string, any>();
 const approvalRequests = new Map<string, any>();
 
+// Tool to save context during discovery phase (before business plan is generated)
+export const saveDiscoveryContext = tool({
+  name: 'saveDiscoveryContext',
+  description: 'Save business context during the discovery phase. Use this as you learn about the business idea, even before generating a formal business plan. This ensures context is available if you need to hand off to another agent.',
+  parameters: {
+    type: 'object',
+    properties: {
+      businessName: {
+        type: 'string',
+        description: 'Name of the business (if known)',
+      },
+      businessIdea: {
+        type: 'string',
+        description: 'Core business idea and value proposition',
+      },
+      targetMarket: {
+        type: 'string',
+        description: 'Target market and customer segments (if known)',
+      },
+      revenueModel: {
+        type: 'string',
+        description: 'Revenue model and pricing strategy (if known)',
+      },
+      timeline: {
+        type: 'string',
+        description: 'Expected timeline for launch (if known)',
+      },
+      budget: {
+        type: 'string',
+        description: 'Available budget or funding (if known)',
+      },
+      additionalNotes: {
+        type: 'string',
+        description: 'Any other important context or notes about the business',
+      },
+    },
+    required: ['businessIdea'],
+    additionalProperties: false,
+  },
+  execute: async (input, details) => {
+    const { businessName, businessIdea, targetMarket, revenueModel, timeline, budget, additionalNotes } = input as {
+      businessName?: string;
+      businessIdea: string;
+      targetMarket?: string;
+      revenueModel?: string;
+      timeline?: string;
+      budget?: string;
+      additionalNotes?: string;
+    };
+
+    // Build conversation summary
+    const summaryParts: string[] = [];
+    if (businessName) summaryParts.push(`Business: ${businessName}`);
+    summaryParts.push(`Idea: ${businessIdea}`);
+    if (targetMarket) summaryParts.push(`Target: ${targetMarket}`);
+    if (revenueModel) summaryParts.push(`Revenue: ${revenueModel}`);
+    if (timeline) summaryParts.push(`Timeline: ${timeline}`);
+    if (budget) summaryParts.push(`Budget: ${budget}`);
+    if (additionalNotes) summaryParts.push(`Notes: ${additionalNotes}`);
+
+    // Update shared context
+    updateBusinessContext({
+      businessName: businessName || 'TBD',
+      businessIdea,
+      targetMarket: targetMarket || 'TBD',
+      revenueModel: revenueModel || 'TBD',
+      timeline: timeline || 'TBD',
+      budget: budget || 'TBD',
+      currentPhase: 'discovery',
+      conversationSummary: summaryParts.join('. '),
+    });
+
+    const addBreadcrumb = (details?.context as any)?.addTranscriptBreadcrumb;
+    if (addBreadcrumb) {
+      addBreadcrumb('[CEO] Discovery Context Saved', { businessIdea });
+    }
+
+    return {
+      success: true,
+      message: 'Context saved. This information will be available to other agents if needed.',
+    };
+  },
+});
+
 // Generate comprehensive business plan
 export const generateBusinessPlan = tool({
   name: 'generateBusinessPlan',

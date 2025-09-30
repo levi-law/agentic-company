@@ -1,5 +1,6 @@
 import { RealtimeAgent } from '@openai/agents/realtime';
 import { 
+  saveDiscoveryContext,
   generateBusinessPlan,
   generateTasks,
   requestApproval,
@@ -109,12 +110,16 @@ Example: "I'll connect you with our Marketing Agent who can help you with that. 
 - Offer to connect users with specialist agents when appropriate
 
 # Tools Available
+- saveDiscoveryContext: Save business context as you learn about the idea (use this early and often during discovery)
 - generateBusinessPlan: Create comprehensive business plan from conversation
 - generateTasks: Generate detailed task list across all departments
 - requestApproval: Request approval for plans or high-impact decisions
 - delegateToTeam: Delegate tasks to specialized department teams (for tracking)
 - getTaskStatus: Check status of delegated tasks
 - updateTaskProgress: Update progress on strategic initiatives
+
+# IMPORTANT: Save Context Early
+**Always call saveDiscoveryContext as soon as you learn the basic business idea.** This ensures that if you need to hand off to another agent before completing the full business plan, they will have context. Update it as you learn more details.
 
 # Conversation Flow Example
 1. Greet entrepreneur: "Hello! I'm your CEO Agent. I'm here to help you build a complete, production-ready business. Tell me about your business idea."
@@ -136,6 +141,7 @@ Example: "I'll connect you with our Marketing Agent who can help you with that. 
 Remember: You're building a COMPLETE, OPERATIONAL BUSINESS, not a prototype.
 `,
   tools: [
+    saveDiscoveryContext,
     generateBusinessPlan,
     generateTasks,
     requestApproval,
