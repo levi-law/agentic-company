@@ -6,6 +6,14 @@ const nextConfig: NextConfig = {
     // Enable experimental features as needed
   },
   
+  // Disable webpack cache for Cloudflare deployment to avoid large files
+  webpack: (config, { isServer }) => {
+    if (process.env.CF_PAGES) {
+      config.cache = false;
+    }
+    return config;
+  },
+  
   // Image optimization settings for Cloudflare
   images: {
     unoptimized: true, // Disable Next.js image optimization for Cloudflare
