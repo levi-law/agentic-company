@@ -12,7 +12,7 @@
 /coverage
 
 # next.js
-*/.next/
+/.next/
 /out/
 
 # production
@@ -30,6 +30,11 @@ yarn-error.log*
 
 # Ignore all env files except .env.sample
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.cloudflare
 
 
 # vercel
