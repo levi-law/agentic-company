@@ -24,8 +24,8 @@ const nextConfig: NextConfig = {
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   },
   
-  // Configure output for Cloudflare Pages with server support
-  // Keep default output for full-stack Next.js with API routes
+  // Configure for Cloudflare Pages with full-stack support
+  // Use default output to support API routes via Cloudflare Functions
   
   // Security headers
   async headers() {
