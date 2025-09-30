@@ -1,9 +1,9 @@
-name = "agentic-company-app"
+name = "agentic-company"
 compatibility_date = "2024-09-30"
 pages_build_output_dir = ".next"
 
 [env.production]
-name = "agentic-company-app"
+name = "agentic-company"
 
 [env.preview]
-name = "agentic-company-app-preview"
+name = "agentic-company-preview"
