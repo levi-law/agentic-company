@@ -1,18 +1,30 @@
 # System Architecture
 
-The Universal Agent Platform is a comprehensive lifecycle management system where the human user acts as CEO of a dynamic virtual organization. Through continuous conversation, the CEO generates and manages tasks stored in a database, while intelligent agent teams execute work across the entire project lifecycle—from initial planning through live operations and continuous improvement. The system emphasizes database-driven task management, real-time adaptability, and seamless integration of AI agents, remote contractors, and CEO oversight throughout all phases of project evolution.
+The Business-Builder Agent Platform builds on OpenAI's Realtime Agents foundation to create a comprehensive business development system. The human user acts as CEO of a dynamic virtual organization, working through voice and text conversations with specialized agent teams that execute business development tasks across all departments—from initial planning through live operations and continuous improvement.
 
-## Core Platform Components
+## Foundation: OpenAI Realtime Agents
 
-| Component | Description | Lifecycle Features |
+We extend the proven OpenAI Realtime Agents architecture rather than building from scratch:
+
+- **Next.js Application**: Modern React framework with TypeScript
+- **OpenAI Realtime API**: Low-latency voice and text interactions  
+- **Agent Framework**: Built-in agent orchestration and handoffs
+- **WebRTC Integration**: Real-time audio/video communication
+- **Tool Integration**: Extensible function calling system
+
+## Extended Platform Components
+
+Building on the OpenAI Realtime Agents foundation:
+
+| Component | Description | Implementation |
 |---|---|---|
-| **CEO Conversation Engine** | Continuous dialogue system that interprets CEO requests and generates appropriate tasks throughout project lifecycle | Natural language processing, context retention, task generation, strategic guidance |
-| **Task Database & Management** | Comprehensive database storing all tasks as structured objects with full lifecycle tracking and relationships | Task creation, assignment, progress tracking, dependency management, performance analytics |
-| **Dynamic Agent Orchestration** | Intelligent system that assembles and manages agent teams based on current project phase and requirements | Real‑time provisioning, workload balancing, skill matching, cross‑project efficiency |
-| **Lifecycle Phase Management** | System that adapts behavior and priorities based on current project phase (planning, development, launch, operations) | Phase‑specific workflows, milestone tracking, transition management, continuous optimization |
-| **Live Operations Support** | Specialized systems for managing ongoing operations, performance monitoring, and continuous improvement | Real‑time monitoring, automated optimization, issue detection, scaling management |
-| **CEO Command Dashboard** | Comprehensive interface providing CEO with full visibility and control across all project phases | Task visualization, performance metrics, team management, strategic planning tools |
-| **Integration & Automation Hub** | Connects to external services and automates workflows throughout the entire project lifecycle | API management, workflow automation, data synchronization, external service coordination |
+| **Business CEO Agent** | Strategic business planning agent that orchestrates department teams | Extended RealtimeAgent with business-specific instructions and handoffs |
+| **Department Agent Teams** | Specialized Producer + QA agent pairs for each business function | Multiple RealtimeAgent configurations with feedback loop tools |
+| **Task Generation System** | AI-powered business task creation from strategic conversations | Custom tools integrated into the existing function calling system |
+| **Quality Gate Framework** | Producer + QA validation cycles with objective metrics | Extended tool logic with validation workflows |
+| **Business Integration Hub** | Connections to business APIs (Stripe, QuickBooks, GitHub, etc.) | Additional API integrations using the existing tool pattern |
+| **Progress Tracking Dashboard** | Real-time visibility into business development progress | Enhanced UI components built on the existing Next.js foundation |
+| **Approval Workflow System** | Human oversight for high-impact business decisions | Extended conversation flows with approval gates |
 
 ## Complete Lifecycle Architecture Flow
 

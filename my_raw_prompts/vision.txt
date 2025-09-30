@@ -1,0 +1,26 @@
+Vision:
+the user is the human here, and he also acts as the CEO. 
+All the rest of the company is virtual and be agentic or remote contract hiring, or the user himself helping with a task (run a code, post online, w/e). 
+
+the general idea is to manage active conversation with the CEO agent (the HUMAN), and generating tasks for the rest of the departments in the company. Each task is kept in a database (not file, database!) and is basically a text object. then for each task, the appropriate agents will be actiavcated. they will do they job, and generate follow up tasks. 
+
+The user can keep one adding new tasks from the prompt. 
+
+Possible User story:
+user enters the system and meets a sells agent that ask him what does he want. 
+user asks to start a company, e.g online estore. 
+the sell agent would run some ping pong questions and fine tune the business. together with the user and the sales agent they create an overview of the requirements (like we did here). 
+the system would go over the overview and generate tasks from it to each department (like we did here when creating our docs).
+the agents would get their prompt and context smartly and would run and do their task. 
+user would be able to see all the tasks nice with V and O and X and assignee etc. 
+
+
+
+Write all of what i said here in proffesional way in a vision.md file 
+
+
+After passing the monitoring stage, this is where it gets interesting - we go live. 
+the system would help to prepare for each part of the project lifecycle, and help the CEO to keep on actively manage it and improving it. 
+
+
+ 

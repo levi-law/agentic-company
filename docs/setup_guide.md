@@ -1,190 +1,330 @@
-# Setup Guide
+# Business-Builder Agent Setup Guide
 
-This guide explains how to set up your development environment for the Business‑Builder Agent project using GitHub, Google Cloud Platform (GCP), Python and React Native.  It assumes basic familiarity with command‑line tools and version control.
+This guide explains how to set up the Business-Builder Agent platform by extending OpenAI's Realtime Agents foundation. We build on their proven Next.js + TypeScript architecture rather than starting from scratch.
 
-## 1. Repository and Version Control (GitHub)
+## 1. Quick Start with OpenAI Realtime Agents
 
-1. **Create the repository** – Sign in to GitHub and create a new private repository named `business‑builder‑agent`.  Initialise it with a `README.md` and a `.gitignore` for Python and React Native.
-2. **Branching strategy** – Adopt trunk‑based development.  Keep the `main` branch deployable.  For each feature or bug fix, create a short‑lived branch (`feature/xyz`) and open a Pull Request (PR).  Require at least one code review and successful CI checks before merging.
-3. **GitHub Actions** – Add workflow files under `.github/workflows/`:
-   - `ci.yml` – Runs linting (Ruff), tests (pytest), type checks (mypy) and static analysis for both backend and mobile code.
-   - `deploy.yml` – Builds a Docker image on merges to `main`, pushes to GCR (Google Container Registry) and deploys to Cloud Run or GKE using `gcloud` CLI.
-   - Store secrets (e.g. `GCP_SERVICE_ACCOUNT_KEY`, `OPENAI_API_KEY`) in GitHub Secrets.  Reference them in workflow steps via `${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}`.
+### Prerequisites
+- Node.js 18+ installed
+- OpenAI API key
+- Git for version control
 
-## 2. Google Cloud Platform Configuration
-
-1. **Create a GCP project** – Use the Cloud Console or CLI (`gcloud projects create`).  Enable APIs: Cloud Run, Cloud Functions, Cloud Storage, Artifact Registry, IAM, Secret Manager and Cloud SQL if needed.
-2. **Service accounts** – For each component (backend API, agent orchestrator, workers) create a dedicated service account (`backend-sa@project.iam.gserviceaccount.com`, etc.).  Grant minimal roles: e.g. `roles/run.admin` to deploy services, `roles/storage.objectAdmin` for file storage, `roles/secretmanager.secretAccessor` for reading secrets.  **Do not** use the default Compute Engine or App Engine service accounts.  Rotate keys regularly and store them in GitHub Secrets or your local secure storage.
-3. **Secret management** – Store sensitive credentials in **Secret Manager**.  For example, create secrets `openai-api-key`, `serpapi-key`, etc.  Give the service accounts permission to access these secrets.  In your application, use the Google Cloud client libraries to retrieve secrets at runtime.
-4. **Deploy Cloud Run services** – Install the `gcloud` CLI locally.  Use `gcloud run deploy` to deploy the API and orchestrator containers.  Example:
+### Initial Setup
+1. **Navigate to the OpenAI Realtime Agents directory**:
    ```bash
-   gcloud run deploy backend-api \
-     --image gcr.io/$PROJECT_ID/backend-api:$IMAGE_TAG \
-     --region europe-west1 \
-     --service-account backend-sa@$PROJECT_ID.iam.gserviceaccount.com \
-     --allow-unauthenticated
-   ```
-   Repeat for the orchestrator and worker services.  Use `--no-allow-unauthenticated` for private endpoints.
-5. **Database setup** – Provision a **Cloud SQL** instance or **Firestore** database.  For Cloud SQL, create a Postgres instance.  Store connection strings in Secret Manager.  Configure SQL users with strong passwords and minimal privileges.
-6. **Storage** – Create a Cloud Storage bucket for artefacts (documents, CSVs, images).  Enable Object Versioning to track changes.  Assign appropriate roles (`roles/storage.objectAdmin` for writers, `roles/storage.objectViewer` for readers).
-
-## 3. Business Integration Hub Setup
-
-### Third‑Party API Configuration
-1. **Financial Services Integration**
-   ```python
-   # config/integrations/financial.py
-   FINANCIAL_INTEGRATIONS = {
-       'stripe': {
-           'api_key': os.getenv('STRIPE_SECRET_KEY'),
-           'webhook_secret': os.getenv('STRIPE_WEBHOOK_SECRET'),
-           'capabilities': ['payments', 'subscriptions', 'invoicing']
-       },
-       'quickbooks': {
-           'client_id': os.getenv('QB_CLIENT_ID'),
-           'client_secret': os.getenv('QB_CLIENT_SECRET'),
-           'capabilities': ['accounting', 'reporting', 'tax_prep']
-       }
-   }
-   ```
-
-2. **Marketing Platform Integration**
-   ```python
-   # config/integrations/marketing.py
-   MARKETING_INTEGRATIONS = {
-       'google_ads': {
-           'developer_token': os.getenv('GOOGLE_ADS_DEVELOPER_TOKEN'),
-           'client_id': os.getenv('GOOGLE_ADS_CLIENT_ID'),
-           'capabilities': ['campaign_management', 'keyword_research', 'analytics']
-       },
-       'hubspot': {
-           'api_key': os.getenv('HUBSPOT_API_KEY'),
-           'capabilities': ['crm', 'email_marketing', 'lead_tracking']
-       }
-   }
-   ```
-
-### API Gateway Configuration
-```yaml
-# kong/kong.yaml
-_format_version: "3.0"
-services:
-- name: business-integration-hub
-  url: http://integration-service:8000
-  plugins:
-  - name: rate-limiting
-    config:
-      minute: 1000
-      hour: 10000
-  - name: oauth2
-    config:
-      scopes:
-      - business_read
-      - business_write
-```
-
-## 4. Mobile Client (React Native)
-
-1. **Setup** – Install Node.js (v18+) and Yarn/PNPM.  Initialise the project using Expo or the React Native CLI:
-   ```bash
-   npx create-expo-app mobile-app
-   cd mobile-app
+   cd openai-realtime-agents
    npm install
    ```
-2. **Directory structure** – Organise screens, components, services (API clients), state management (Redux or React Context).  Use TypeScript for type safety.
-3. **Environment** – Use `.env` files for API endpoints and feature flags.  Use `react-native-dotenv` to load them.  Do not commit secrets.
-4. **Testing** – Use Jest and React Native Testing Library for unit tests.  For end‑to‑end tests, use Detox or Playwright on mobile.
-5. **CI** – Set up a GitHub Actions workflow to build the app and run tests.  For releases, use Expo Application Services (EAS) or Fastlane to build and submit to app stores.
 
-## 5. Local Secrets and API Keys
-
-- **OpenAI API** – Required for language model calls.  Sign up at OpenAI and obtain an API key.  Store it as `OPENAI_API_KEY` in Secret Manager and GitHub Secrets.
-- **Search API (e.g. SerpAPI or Tavily)** – Agents need a search tool.  Obtain API keys and store them securely.  Configure usage quotas to control costs.
-- **Vector Database** – Choose a provider (Weaviate Cloud, Pinecone, Chroma).  Obtain credentials and endpoints.  Set environment variables accordingly.
-- **Email and Ads APIs** – If the agent drafts emails or ad campaigns, create service accounts or API keys (e.g. Gmail API, Facebook Ads API).  Because sending emails or ads is a high‑impact action, require explicit user approval before the agent uses these keys.
-
-## 6. CI/CD Pipeline Setup
-
-### GitHub Actions Workflows
-1. **Multi‑Environment Pipeline**
-   ```yaml
-   # .github/workflows/deploy.yml
-   name: Deploy Business Builder
-   on:
-     push:
-       branches: [main]
-   
-   jobs:
-     test:
-       runs-on: ubuntu-latest
-       steps:
-       - uses: actions/checkout@v4
-       - name: Run Agent Tests
-         run: |
-           pytest tests/agents/ --cov=90
-           pytest tests/integrations/ --cov=85
-   
-     deploy-staging:
-       needs: test
-       runs-on: ubuntu-latest
-       steps:
-       - name: Deploy to Staging
-         run: |
-           helm upgrade --install business-builder-staging \
-             ./helm/business-builder \
-             --namespace staging \
-             --set image.tag=${{ github.sha }}
-   
-     deploy-production:
-       needs: deploy-staging
-       runs-on: ubuntu-latest
-       if: github.ref == 'refs/heads/main'
-       steps:
-       - name: Deploy to Production
-         run: |
-           helm upgrade --install business-builder-prod \
-             ./helm/business-builder \
-             --namespace production \
-             --set image.tag=${{ github.sha }}
+2. **Configure environment**:
+   ```bash
+   cp .env.sample .env
+   # Edit .env and add your OpenAI API key:
+   # OPENAI_API_KEY=your_openai_api_key_here
    ```
 
-### Helm Chart Configuration
-```yaml
-# helm/business-builder/values.yaml
-image:
-  repository: business-builder/platform
-  tag: latest
-  pullPolicy: IfNotPresent
+3. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
 
-agentTeams:
-  technical:
-    replicas: 3
-    resources:
-      requests:
-        memory: "1Gi"
-        cpu: "500m"
-  marketing:
-    replicas: 2
-    resources:
-      requests:
-        memory: "512Mi"
-        cpu: "250m"
+4. **Access the application**:
+   - Open http://localhost:3000
+   - Test the existing agent patterns (Chat Supervisor, Sequential Handoff)
+   - Use the scenario dropdown to switch between different agent configurations
 
-monitoring:
-  enabled: true
-  prometheus:
-    enabled: true
-  grafana:
-    enabled: true
-```
+## 2. Understanding the Foundation
 
-## 7. Deployment Checklist
+### Current Agent Patterns
+The OpenAI Realtime Agents demo includes two main patterns:
 
-- [ ] All tests pass and coverage meets target (>85 %).
-- [ ] Secrets stored in GitHub and GCP are up to date.
-- [ ] Service accounts have minimal roles and keys rotated.
-- [ ] Docker image built and scanned for vulnerabilities.
-- [ ] Cloud Run or GKE manifests updated with the new image.
-- [ ] Mobile app configuration points to the production API endpoint.
+1. **Chat-Supervisor Pattern** (`src/app/agentConfigs/chatSupervisor/`)
+   - Realtime chat agent handles basic interactions
+   - Supervisor agent (GPT-4) handles complex tasks and tool calls
+   - Good for high-quality responses with slight latency increase
 
-Following these steps will give you a robust foundation for building and deploying the Business‑Builder Agent on GitHub and GCP.  Adjust roles and resources based on your organisation’s compliance requirements and scale.
+2. **Sequential Handoff Pattern** (`src/app/agentConfigs/simpleHandoff.ts`)
+   - Specialized agents transfer users between them
+   - Each agent handles specific user intents
+   - Great for customer service and specialized workflows
+
+### Key Components
+- **RealtimeAgent Class**: Base agent configuration with instructions, tools, and handoffs
+- **Agent Configs**: Different agent setups in `src/app/agentConfigs/`
+- **Tool System**: Function calling for external integrations
+- **Handoff System**: Agent-to-agent transfers via tool calls
+
+## 3. Extending with Business Agents
+
+### Creating Business Agent Configurations
+
+1. **Create a new business agent config**:
+   ```bash
+   mkdir src/app/agentConfigs/businessBuilder
+   touch src/app/agentConfigs/businessBuilder/index.ts
+   ```
+
+2. **Define the CEO Business Agent**:
+   ```typescript
+   // src/app/agentConfigs/businessBuilder/index.ts
+   import { RealtimeAgent } from '@openai/agents/realtime';
+   
+   export const ceoAgent = new RealtimeAgent({
+     name: 'ceoAgent',
+     handoffDescription: 'Strategic business planning and oversight agent',
+     instructions: `You are a CEO-level business development agent that helps entrepreneurs 
+       build complete, production-ready businesses. You coordinate with specialized department 
+       agents and ensure quality through producer + QA agent pairs.
+       
+       Your role:
+       1. Understand business goals and requirements
+       2. Break down objectives into department-specific tasks
+       3. Coordinate handoffs to appropriate department agents
+       4. Review and approve major business decisions
+       5. Ensure quality standards across all departments`,
+     tools: [
+       // Business planning tools
+       generateBusinessPlan,
+       createTaskBreakdown,
+       // Department coordination tools
+       coordinateDepartments,
+       trackProgress
+     ],
+     handoffs: [legalAgent, technicalAgent, marketingAgent, financeAgent, operationsAgent, hrAgent]
+   });
+   ```
+
+### Creating Department Agent Teams
+
+3. **Legal Department Team**:
+   ```typescript
+   // src/app/agentConfigs/businessBuilder/legal.ts
+   export const legalProducer = new RealtimeAgent({
+     name: 'legalProducer',
+     handoffDescription: 'Legal document creation and business registration',
+     instructions: `You handle all legal aspects of business formation:
+       - Business entity registration (LLC, Corp)
+       - Contract templates and agreements
+       - Compliance documentation
+       - Intellectual property protection`,
+     tools: [businessRegistration, contractGeneration, complianceCheck],
+     handoffs: [legalQA, ceoAgent]
+   });
+   
+   export const legalQA = new RealtimeAgent({
+     name: 'legalQA',
+     handoffDescription: 'Legal compliance review and validation',
+     instructions: `You validate all legal work for compliance and accuracy:
+       - Review legal documents for completeness
+       - Verify regulatory compliance
+       - Check for legal risks and issues
+       - Ensure proper legal structure`,
+     tools: [validateLegalDocs, complianceAudit, riskAssessment],
+     handoffs: [legalProducer, ceoAgent]
+   });
+   ```
+
+4. **Technical Department Team**:
+   ```typescript
+   // src/app/agentConfigs/businessBuilder/technical.ts
+   export const technicalProducer = new RealtimeAgent({
+     name: 'technicalProducer',
+     handoffDescription: 'Full-stack development and infrastructure setup',
+     instructions: `You handle all technical development:
+       - Website and application development
+       - Database design and setup
+       - Cloud infrastructure deployment
+       - Security implementation`,
+     tools: [codeGeneration, infrastructureSetup, deploymentTools],
+     handoffs: [technicalQA, ceoAgent]
+   });
+   
+   export const technicalQA = new RealtimeAgent({
+     name: 'technicalQA',
+     handoffDescription: 'Code review and technical validation',
+     instructions: `You validate all technical work:
+       - Code quality and security review
+       - Performance testing
+       - Infrastructure validation
+       - Deployment verification`,
+     tools: [codeReview, securityScan, performanceTest],
+     handoffs: [technicalProducer, ceoAgent]
+   });
+   ```
+
+## 4. Business Tool Integration
+
+### Creating Business-Specific Tools
+
+1. **Business Planning Tools**:
+   ```typescript
+   // src/app/agentConfigs/businessBuilder/tools/planning.ts
+   export const generateBusinessPlan = {
+     name: 'generate_business_plan',
+     description: 'Generate comprehensive business plan based on user requirements',
+     parameters: {
+       type: 'object',
+       properties: {
+         businessType: { type: 'string', description: 'Type of business (e-commerce, SaaS, etc.)' },
+         targetMarket: { type: 'string', description: 'Target customer segment' },
+         budget: { type: 'number', description: 'Available budget' },
+         timeline: { type: 'string', description: 'Desired launch timeline' }
+       },
+       required: ['businessType', 'targetMarket', 'budget', 'timeline']
+     }
+   };
+   
+   export const createTaskBreakdown = {
+     name: 'create_task_breakdown',
+     description: 'Break down business objectives into department-specific tasks',
+     parameters: {
+       type: 'object',
+       properties: {
+         businessPlan: { type: 'object', description: 'The generated business plan' },
+         departments: { type: 'array', items: { type: 'string' }, description: 'Departments involved' }
+       },
+       required: ['businessPlan', 'departments']
+     }
+   };
+   ```
+
+2. **Integration Tools**:
+   ```typescript
+   // src/app/agentConfigs/businessBuilder/tools/integrations.ts
+   export const stripeIntegration = {
+     name: 'setup_stripe_payments',
+     description: 'Set up Stripe payment processing for the business',
+     parameters: {
+       type: 'object',
+       properties: {
+         businessName: { type: 'string' },
+         businessType: { type: 'string' },
+         country: { type: 'string' }
+       },
+       required: ['businessName', 'businessType', 'country']
+     }
+   };
+   
+   export const githubIntegration = {
+     name: 'setup_github_repository',
+     description: 'Create and configure GitHub repository for the business',
+     parameters: {
+       type: 'object',
+       properties: {
+         repositoryName: { type: 'string' },
+         isPrivate: { type: 'boolean' },
+         template: { type: 'string' }
+       },
+       required: ['repositoryName']
+     }
+   };
+   ```
+
+## 5. Quality Gate Implementation
+
+### Feedback Loop System
+
+1. **Quality Validation Flow**:
+   ```typescript
+   // Each producer agent creates deliverables
+   // QA agent validates using objective criteria
+   // Failed validation returns to producer with specific feedback
+   // Successful validation proceeds to next phase or CEO approval
+   
+   export const qualityGateFlow = {
+     producer: 'Creates business deliverable',
+     qa: 'Validates against quality standards',
+     decision: 'Pass/Fail based on objective metrics',
+     feedback: 'Specific improvement recommendations',
+     escalation: 'CEO approval for high-impact decisions'
+   };
+   ```
+
+2. **Validation Criteria**:
+   ```typescript
+   // src/app/agentConfigs/businessBuilder/validation/criteria.ts
+   export const legalValidation = {
+     completeness: 'All required legal documents present',
+     compliance: 'Meets regulatory requirements',
+     accuracy: 'Legal information is correct',
+     risk: 'Legal risks identified and mitigated'
+   };
+   
+   export const technicalValidation = {
+     functionality: 'Code works as expected',
+     security: 'Security standards met',
+     performance: 'Performance benchmarks achieved',
+     scalability: 'Architecture supports growth'
+   };
+   ```
+
+## 6. Adding to Agent Config Index
+
+1. **Register the new business config**:
+   ```typescript
+   // src/app/agentConfigs/index.ts
+   import businessBuilder from './businessBuilder';
+   
+   export const agentConfigs = {
+     chatSupervisor,
+     customerServiceRetail,
+     simpleHandoff,
+     businessBuilder  // Add the new business config
+   };
+   ```
+
+2. **Update the UI dropdown** to include the new business builder option.
+
+## 7. Development Workflow
+
+### Testing Your Business Agents
+
+1. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
+
+2. **Select "Business Builder" from the scenario dropdown**
+
+3. **Test the business conversation flow**:
+   - "I want to start an e-commerce business"
+   - Observe handoffs between CEO and department agents
+   - Test the producer + QA validation cycles
+
+4. **Monitor agent interactions** in the event log panel
+
+### Deployment
+
+1. **Vercel Deployment** (Recommended):
+   ```bash
+   npm install -g vercel
+   vercel
+   ```
+
+2. **Environment Variables**:
+   - Set `OPENAI_API_KEY` in Vercel dashboard
+   - Configure any additional business API keys
+
+3. **Custom Domain**:
+   - Configure custom domain in Vercel
+   - Set up SSL certificates automatically
+
+## 8. Next Steps
+
+### Immediate Development Priorities
+
+1. **Create CEO Business Agent** with strategic planning capabilities
+2. **Implement Legal Team** (Producer + QA agents)
+3. **Add Technical Team** (Developer + Code Reviewer agents)
+4. **Build Marketing Team** (Marketer + Performance Analyst agents)
+5. **Create Finance Team** (Financial Planner + Audit agents)
+
+### Advanced Features
+
+1. **Business Templates**: Pre-configured agent teams for different industries
+2. **Progress Tracking**: Real-time business development dashboards
+3. **Integration Hub**: Connections to business APIs (Stripe, QuickBooks, etc.)
+4. **Approval Workflows**: Human oversight for high-impact decisions
+5. **Performance Analytics**: Success metrics and optimization insights
+
+This setup guide provides a clear path to extend the OpenAI Realtime Agents foundation into a comprehensive business-building platform while leveraging the proven architecture and patterns already established.

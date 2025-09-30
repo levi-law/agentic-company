@@ -1,0 +1,2 @@
+you are still too specific. dont say 7 teams. the composition of the team is dynamic! the CEO decides who he wants and where to focus. write again all the docs with this new input in mind - dynamic teams, can server any purpose in any division of any businesss or projet. even students should be able to use this app and ask it for research. the team would be tailored to that - data scientist, mathmatician, legal, patent writer, etc. 
+so for each prompot / user - the everything is built dynamically, possibly with re-use between users. 
