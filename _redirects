@@ -1,8 +1,5 @@
 # Redirect home to root
 /home / 301
 
-# SPA fallback for client-side routing
-/* /index.html 200
-
-# API routes (if using Functions)
+# API routes handled by Cloudflare Functions
 /api/* /api/:splat 200
