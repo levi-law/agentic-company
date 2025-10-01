@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, FC, PropsWithChildren } from "react";
+import React, { createContext, useContext, useState, FC, PropsWithChildren, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { LoggedEvent } from "@/app/types";
 
@@ -10,15 +10,37 @@ type EventContextValue = {
   logServerEvent: (eventObj: Record<string, any>, eventNameSuffix?: string) => void;
   logHistoryItem: (item: any) => void;
   toggleExpand: (id: number | string) => void;
+  onTasksGenerated?: (callback: (tasks: any[]) => void) => void;
+  setSaveEventCallback?: (callback: (direction: 'client' | 'server', eventName: string, eventData: any) => void) => void;
 };
 
 const EventContext = createContext<EventContextValue | undefined>(undefined);
 
 export const EventProvider: FC<PropsWithChildren> = ({ children }) => {
   const [loggedEvents, setLoggedEvents] = useState<LoggedEvent[]>([]);
+  const [onTasksGeneratedCallback, setOnTasksGeneratedCallback] = useState<((tasks: any[]) => void) | undefined>(undefined);
+  const [saveEventCallback, setSaveEventCallbackState] = useState<((direction: 'client' | 'server', eventName: string, eventData: any) => void) | undefined>(undefined);
 
   function addLoggedEvent(direction: "client" | "server", eventName: string, eventData: Record<string, any>) {
     const id = eventData.event_id || uuidv4();
+    
+    // Check if this is a generateTasks function call result
+    if (direction === "server" && 
+        eventData.type === "function_call" && 
+        eventData.name === "generateTasks" &&
+        eventData.status === "done" &&
+        eventData.output?.tasks) {
+      // Notify about tasks being generated
+      if (onTasksGeneratedCallback) {
+        onTasksGeneratedCallback(eventData.output.tasks);
+      }
+    }
+    
+    // Save to database if callback is set
+    if (saveEventCallback) {
+      saveEventCallback(direction, eventName, eventData);
+    }
+    
     setLoggedEvents((prev) => [
       ...prev,
       {
@@ -65,9 +87,25 @@ export const EventProvider: FC<PropsWithChildren> = ({ children }) => {
   };
 
 
+  const registerTasksCallback = (callback: (tasks: any[]) => void) => {
+    setOnTasksGeneratedCallback(() => callback);
+  };
+
+  const setSaveEventCallback = (callback: (direction: 'client' | 'server', eventName: string, eventData: any) => void) => {
+    setSaveEventCallbackState(() => callback);
+  };
+
   return (
     <EventContext.Provider
-      value={{ loggedEvents, logClientEvent, logServerEvent, logHistoryItem, toggleExpand }}
+      value={{ 
+        loggedEvents, 
+        logClientEvent, 
+        logServerEvent, 
+        logHistoryItem, 
+        toggleExpand,
+        onTasksGenerated: registerTasksCallback,
+        setSaveEventCallback,
+      }}
     >
       {children}
     </EventContext.Provider>

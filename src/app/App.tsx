@@ -21,6 +21,7 @@ import type { RealtimeAgent } from '@openai/agents/realtime';
 // Context providers & hooks
 import { useTranscript } from "@/app/contexts/TranscriptContext";
 import { useEvent } from "@/app/contexts/EventContext";
+import { useTasks } from "@/app/contexts/TasksContext";
 import { useRealtimeSession } from "./hooks/useRealtimeSession";
 import { createModerationGuardrail } from "@/app/agentConfigs/guardrails";
 
@@ -43,9 +44,11 @@ const sdkScenarioMap: Record<string, RealtimeAgent[]> = {
 
 import useAudioDownload from "./hooks/useAudioDownload";
 import { useHandleSessionHistory } from "./hooks/useHandleSessionHistory";
+import { useSessionPersistence } from "./hooks/useSessionPersistence";
 
 function App() {
   const searchParams = useSearchParams()!;
+  const agentSetKey = searchParams.get("agentConfig") || "default";
 
   // ---------------------------------------------------------------------
   // Codec selector – lets you toggle between wide-band Opus (48 kHz)
@@ -66,9 +69,23 @@ function App() {
     addTranscriptMessage,
     addTranscriptBreadcrumb,
   } = useTranscript();
-  const { logClientEvent, logServerEvent } = useEvent();
+  const { logClientEvent, logServerEvent, onTasksGenerated, setSaveEventCallback } = useEvent();
+  const { addTasks } = useTasks();
 
   const [selectedAgentName, setSelectedAgentName] = useState<string>("");
+  
+  // Session persistence hook
+  const {
+    sessionId,
+    saveMessage,
+    saveEvent,
+    saveTasks,
+    saveBusinessPlan,
+  } = useSessionPersistence({
+    agentConfig: agentSetKey,
+    activeAgent: selectedAgentName,
+    enabled: true, // Set to false to disable database persistence
+  });
   const [selectedAgentConfigSet, setSelectedAgentConfigSet] = useState<
     RealtimeAgent[] | null
   >(null);
@@ -136,12 +153,34 @@ function App() {
     try {
       sendEvent(eventObj);
       logClientEvent(eventObj, eventNameSuffix);
+      
+      // Save event to database
+      const eventName = `${eventObj.type || ""} ${eventNameSuffix || ""}`.trim();
+      saveEvent('client', eventName, eventObj);
     } catch (err) {
       console.error('Failed to send via SDK', err);
     }
   };
 
   useHandleSessionHistory();
+
+  // Register callback to update tasks when they're generated
+  useEffect(() => {
+    if (onTasksGenerated) {
+      onTasksGenerated((tasks) => {
+        addTasks(tasks);
+        // Also save to database
+        saveTasks(tasks);
+      });
+    }
+  }, [onTasksGenerated, addTasks, saveTasks]);
+
+  // Register callback to save events to database
+  useEffect(() => {
+    if (setSaveEventCallback) {
+      setSaveEventCallback(saveEvent);
+    }
+  }, [setSaveEventCallback, saveEvent]);
 
   useEffect(() => {
     let finalAgentConfig = searchParams.get("agentConfig");
@@ -545,8 +584,6 @@ function App() {
       stopRecording();
     };
   }, [sessionStatus]);
-
-  const agentSetKey = searchParams.get("agentConfig") || "default";
 
   return (
     <div className="text-base flex h-screen bg-gray-100 text-gray-800 relative">
