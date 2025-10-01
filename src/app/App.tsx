@@ -11,7 +11,7 @@ import Events from "./components/Events";
 import BottomToolbar from "./components/BottomToolbar";
 import TasksView from "./components/TasksView";
 import TaskScreen from "./components/TaskScreen";
-import FloatingMenu from "./components/FloatingMenu";
+import Sidebar from "./components/Sidebar";
 import NewTaskForm from "./components/NewTaskForm";
 
 // Types
@@ -115,6 +115,8 @@ function App() {
     useState<boolean>(true);
   const [selectedTask, setSelectedTask] = useState<any | null>(null);
   const [currentView, setCurrentView] = useState<"main" | "tasks" | "newTask" | "taskDetail">("main");
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [userText, setUserText] = useState<string>("");
   const [isPTTActive, setIsPTTActive] = useState<boolean>(false);
   const [isPTTUserSpeaking, setIsPTTUserSpeaking] = useState<boolean>(false);
@@ -386,14 +388,8 @@ function App() {
     }
   };
 
-  const handleTasksMenuClick = () => {
-    setCurrentView("tasks");
-    setSelectedTask(null);
-  };
-
-  const handleNewTaskMenuClick = () => {
-    setCurrentView("newTask");
-  };
+  // Removed - navigation now through sidebar only
+  // Task management can be added to sidebar menu in future
 
   const handleBackToMain = () => {
     setCurrentView("main");
@@ -405,6 +401,38 @@ function App() {
     // In a real implementation, this would save to backend
     // For now, just go back to tasks view
     setCurrentView("tasks");
+  };
+
+  const handleNewConversation = () => {
+    const newConvId = `conv_${Date.now()}`;
+    const newConv = {
+      id: newConvId,
+      title: "New Conversation",
+      lastMessage: "Start chatting...",
+      timestamp: new Date().toISOString(),
+      createdAt: Date.now(),
+    };
+    setConversations([newConv, ...conversations]);
+    setCurrentConversationId(newConvId);
+    setCurrentView("main");
+    
+    // Clear transcript for new conversation
+    // In production, this would load/save to backend
+  };
+
+  const handleSelectConversation = (id: string) => {
+    setCurrentConversationId(id);
+    setCurrentView("main");
+    // In production, this would load conversation history from backend
+    console.log("Loading conversation:", id);
+  };
+
+  const handleDeleteConversation = (id: string) => {
+    setConversations(conversations.filter(conv => conv.id !== id));
+    if (currentConversationId === id) {
+      setCurrentConversationId(null);
+    }
+    // In production, this would delete from backend
   };
 
   useEffect(() => {
@@ -422,6 +450,30 @@ function App() {
     if (storedAudioPlaybackEnabled) {
       setIsAudioPlaybackEnabled(storedAudioPlaybackEnabled === "true");
     }
+    
+    // Load conversations from localStorage
+    const storedConversations = localStorage.getItem("conversations");
+    if (storedConversations) {
+      try {
+        const parsed = JSON.parse(storedConversations);
+        setConversations(parsed);
+      } catch (e) {
+        console.error("Failed to load conversations:", e);
+      }
+    }
+    
+    // Create initial conversation if none exist
+    if (!storedConversations) {
+      const initialConv = {
+        id: `conv_${Date.now()}`,
+        title: "Welcome Chat",
+        lastMessage: "Start your first conversation",
+        timestamp: new Date().toISOString(),
+        createdAt: Date.now(),
+      };
+      setConversations([initialConv]);
+      setCurrentConversationId(initialConv.id);
+    }
   }, []);
 
   useEffect(() => {
@@ -431,6 +483,13 @@ function App() {
   useEffect(() => {
     localStorage.setItem("logsExpanded", isEventsPaneExpanded.toString());
   }, [isEventsPaneExpanded]);
+
+  useEffect(() => {
+    // Save conversations to localStorage whenever they change
+    if (conversations.length > 0) {
+      localStorage.setItem("conversations", JSON.stringify(conversations));
+    }
+  }, [conversations]);
 
   useEffect(() => {
     localStorage.setItem(
@@ -490,8 +549,19 @@ function App() {
   const agentSetKey = searchParams.get("agentConfig") || "default";
 
   return (
-    <div className="text-base flex flex-col h-screen bg-gray-100 text-gray-800 relative">
-      <div className="p-5 text-lg font-semibold flex justify-between items-center">
+    <div className="text-base flex h-screen bg-gray-100 text-gray-800 relative">
+      {/* Sidebar */}
+      <Sidebar
+        conversations={conversations}
+        currentConversationId={currentConversationId}
+        onSelectConversation={handleSelectConversation}
+        onNewConversation={handleNewConversation}
+        onDeleteConversation={handleDeleteConversation}
+      />
+
+      {/* Main Content */}
+      <div className="flex flex-col flex-1 min-w-0">
+        <div className="p-5 text-lg font-semibold flex justify-between items-center">
         <div
           className="flex items-center cursor-pointer"
           onClick={() => window.location.reload()}
@@ -630,14 +700,6 @@ function App() {
         ) : null}
       </div>
 
-      {/* Floating Menu - only show on main view */}
-      {currentView === "main" && (
-        <FloatingMenu
-          onTasksClick={handleTasksMenuClick}
-          onNewTaskClick={handleNewTaskMenuClick}
-        />
-      )}
-
       <BottomToolbar
         sessionStatus={sessionStatus}
         onToggleConnection={onToggleConnection}
@@ -653,6 +715,7 @@ function App() {
         codec={urlCodec}
         onCodecChange={handleCodecChange}
       />
+      </div>
     </div>
   );
 }
