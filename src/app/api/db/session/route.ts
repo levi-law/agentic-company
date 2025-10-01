@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/app/lib/db';
+import { prisma } from '@/app/lib/db';
+
+export const runtime = 'edge';
 
 // GET /api/db/session?sessionId=xxx - Get session by ID
 // GET /api/db/session - Get all sessions
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
+    const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get('sessionId');
 
     if (sessionId) {

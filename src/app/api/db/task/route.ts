@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/app/lib/db';
+import { prisma } from '@/app/lib/db';
+
+export const runtime = 'edge';
 
 // POST /api/db/task - Create or update tasks (bulk operation)
 export async function POST(request: NextRequest) {

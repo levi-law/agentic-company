@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/app/lib/db';
+import { prisma } from '@/app/lib/db';
+
+export const runtime = 'edge';
 
 // POST /api/db/event - Create new event
 export async function POST(request: NextRequest) {
