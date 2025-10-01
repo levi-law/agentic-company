@@ -12,11 +12,19 @@ interface UseSessionPersistenceProps {
 let initializationPromise: Promise<string> | null = null;
 let globalSessionId: string | null = null;
 
+// Initialize from localStorage on module load
+if (typeof window !== 'undefined') {
+  const stored = localStorage.getItem('currentSessionId');
+  if (stored) {
+    globalSessionId = stored;
+  }
+}
+
 export function useSessionPersistence({ agentConfig, activeAgent, enabled = true }: UseSessionPersistenceProps) {
   const [sessionId, setSessionId] = useState<string | null>(() => globalSessionId);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const sessionInitialized = useRef(false);
+  const sessionInitialized = useRef(!!globalSessionId); // Already initialized if we have globalSessionId
   const initializationInProgress = useRef(false);
   const { user, isAuthenticated } = useAuth();
 
