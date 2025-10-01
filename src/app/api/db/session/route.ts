@@ -3,27 +3,35 @@ import { prisma } from '@/app/lib/db';
 
 export const runtime = 'edge';
 
-// GET /api/db/session?sessionId=xxx - Get session by ID
 // GET /api/db/session - Get all sessions
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get('sessionId');
+    const userId = searchParams.get('userId');
 
     if (sessionId) {
       const session = await prisma.session.findUnique({
         where: { id: sessionId },
         include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              username: true,
+              name: true,
+            },
+          },
           messages: {
             orderBy: { createdAt: 'asc' },
           },
           events: {
             orderBy: { createdAt: 'asc' },
           },
-          businessPlan: true,
           tasks: {
             orderBy: { createdAt: 'asc' },
           },
+          businessPlan: true,
         },
       });
 
@@ -32,26 +40,65 @@ export async function GET(request: NextRequest) {
       }
 
       return NextResponse.json(session);
-    }
-
-    // Get all sessions
-    const sessions = await prisma.session.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: 50,
-      include: {
-        _count: {
-          select: {
-            messages: true,
-            tasks: true,
+    } else if (userId) {
+      // Return sessions for a specific user
+      const sessions = await prisma.session.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              username: true,
+              name: true,
+            },
           },
+          messages: {
+            orderBy: { createdAt: 'asc' },
+          },
+          events: {
+            orderBy: { createdAt: 'asc' },
+          },
+          tasks: {
+            orderBy: { createdAt: 'asc' },
+          },
+          businessPlan: true,
         },
-      },
-    });
+      });
 
-    return NextResponse.json(sessions);
+      return NextResponse.json(sessions);
+    } else {
+      // Return all sessions
+      const sessions = await prisma.session.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              username: true,
+              name: true,
+            },
+          },
+          messages: {
+            orderBy: { createdAt: 'asc' },
+          },
+          events: {
+            orderBy: { createdAt: 'asc' },
+          },
+          tasks: {
+            orderBy: { createdAt: 'asc' },
+          },
+          businessPlan: true,
+        },
+      });
+
+      return NextResponse.json(sessions);
+    }
   } catch (error) {
-    console.error('Error fetching session:', error);
-    return NextResponse.json({ error: 'Failed to fetch session' }, { status: 500 });
+    console.error('Session GET error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -59,20 +106,31 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { agentConfig, activeAgent } = body;
+    const { agentConfig, activeAgent, userId } = body;
 
     const session = await prisma.session.create({
       data: {
         agentConfig,
-        activeAgent,
+        activeAgent: activeAgent || null,
         status: 'active',
+        userId: userId || null,
+      },
+      include: {
+        user: userId ? {
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            name: true,
+          },
+        } : false,
       },
     });
 
-    return NextResponse.json(session);
+    return NextResponse.json(session, { status: 201 });
   } catch (error) {
-    console.error('Error creating session:', error);
-    return NextResponse.json({ error: 'Failed to create session' }, { status: 500 });
+    console.error('Session POST error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -80,13 +138,24 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { sessionId, activeAgent, status } = body;
+    const { sessionId, activeAgent, status, userId } = body;
 
     const session = await prisma.session.update({
       where: { id: sessionId },
       data: {
-        ...(activeAgent && { activeAgent }),
+        ...(activeAgent !== undefined && { activeAgent }),
         ...(status && { status }),
+        ...(userId !== undefined && { userId }),
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            name: true,
+          },
+        },
       },
     });
 
