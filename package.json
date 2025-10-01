@@ -4,10 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && npm run clean-cache && npm run copy-headers",
-    "build:cf": "CF_PAGES=1 next build && npm run clean-cache && npm run copy-headers",
-    "clean-cache": "rm -rf .next/cache && find .next -name '*.pack' -delete",
-    "copy-headers": "mkdir -p .vercel/output/static && cp _headers _redirects .vercel/output/static/ 2>/dev/null || true",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "prisma generate",
