@@ -3,7 +3,7 @@ import { prisma } from '@/app/lib/db';
 import bcrypt from 'bcryptjs';
 import { signJWT } from '@/app/lib/jwt';
 
-export const runtime = 'edge';
+// export const runtime = 'edge'; // Commented out for local dev - Prisma doesn't support Edge Runtime locally
 
 
 export async function POST(request: NextRequest) {

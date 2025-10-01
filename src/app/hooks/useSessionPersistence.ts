@@ -17,14 +17,7 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
 
   // Initialize or restore session
   useEffect(() => {
-    if (!enabled) return;
-    
-    // Reset initialization flag when user authentication changes
-    if (sessionInitialized.current) {
-      sessionInitialized.current = false;
-    }
-    
-    if (sessionInitialized.current) return;
+    if (!enabled || sessionInitialized.current) return;
 
     const initializeSession = async () => {
       setIsLoading(true);

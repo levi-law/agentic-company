@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-export const runtime = 'edge';
+// export const runtime = 'edge'; // Commented out for local dev - Prisma doesn't support Edge Runtime locally
 
 export async function POST() {
   try {

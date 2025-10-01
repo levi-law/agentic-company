@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
 
-export const runtime = 'edge';
+// export const runtime = 'edge'; // Commented out for local dev - Prisma doesn't support Edge Runtime locally
 
 // POST /api/db/task - Create or update tasks (bulk operation)
 export async function POST(request: NextRequest) {
