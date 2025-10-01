@@ -9,6 +9,10 @@ import Image from "next/image";
 import Transcript from "./components/Transcript";
 import Events from "./components/Events";
 import BottomToolbar from "./components/BottomToolbar";
+import TasksView from "./components/TasksView";
+import TaskScreen from "./components/TaskScreen";
+import Sidebar from "./components/Sidebar";
+import NewTaskForm from "./components/NewTaskForm";
 
 // Types
 import { SessionStatus } from "@/app/types";
@@ -109,6 +113,10 @@ function App() {
 
   const [isEventsPaneExpanded, setIsEventsPaneExpanded] =
     useState<boolean>(true);
+  const [selectedTask, setSelectedTask] = useState<any | null>(null);
+  const [currentView, setCurrentView] = useState<"main" | "tasks" | "newTask" | "taskDetail">("main");
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [userText, setUserText] = useState<string>("");
   const [isPTTActive, setIsPTTActive] = useState<boolean>(false);
   const [isPTTUserSpeaking, setIsPTTUserSpeaking] = useState<boolean>(false);
@@ -354,6 +362,79 @@ function App() {
     window.location.replace(url.toString());
   };
 
+  const handleTaskClick = (task: any) => {
+    setSelectedTask(task);
+    setCurrentView("taskDetail");
+  };
+
+  const handleBackFromTask = () => {
+    setSelectedTask(null);
+    setCurrentView("tasks");
+  };
+
+  const handleRunTask = (taskId: string) => {
+    console.log("Running task:", taskId);
+    // In a real implementation, this would trigger task execution
+    if (selectedTask && selectedTask.id === taskId) {
+      setSelectedTask({ ...selectedTask, status: "in_progress" });
+    }
+  };
+
+  const handleUpdateTaskStatus = (taskId: string, status: string) => {
+    console.log("Updating task status:", taskId, status);
+    // In a real implementation, this would update the task in the backend
+    if (selectedTask && selectedTask.id === taskId) {
+      setSelectedTask({ ...selectedTask, status });
+    }
+  };
+
+  // Removed - navigation now through sidebar only
+  // Task management can be added to sidebar menu in future
+
+  const handleBackToMain = () => {
+    setCurrentView("main");
+    setSelectedTask(null);
+  };
+
+  const handleNewTaskSubmit = (taskData: any) => {
+    console.log("New task created:", taskData);
+    // In a real implementation, this would save to backend
+    // For now, just go back to tasks view
+    setCurrentView("tasks");
+  };
+
+  const handleNewConversation = () => {
+    const newConvId = `conv_${Date.now()}`;
+    const newConv = {
+      id: newConvId,
+      title: "New Conversation",
+      lastMessage: "Start chatting...",
+      timestamp: new Date().toISOString(),
+      createdAt: Date.now(),
+    };
+    setConversations([newConv, ...conversations]);
+    setCurrentConversationId(newConvId);
+    setCurrentView("main");
+    
+    // Clear transcript for new conversation
+    // In production, this would load/save to backend
+  };
+
+  const handleSelectConversation = (id: string) => {
+    setCurrentConversationId(id);
+    setCurrentView("main");
+    // In production, this would load conversation history from backend
+    console.log("Loading conversation:", id);
+  };
+
+  const handleDeleteConversation = (id: string) => {
+    setConversations(conversations.filter(conv => conv.id !== id));
+    if (currentConversationId === id) {
+      setCurrentConversationId(null);
+    }
+    // In production, this would delete from backend
+  };
+
   useEffect(() => {
     const storedPushToTalkUI = localStorage.getItem("pushToTalkUI");
     if (storedPushToTalkUI) {
@@ -369,6 +450,30 @@ function App() {
     if (storedAudioPlaybackEnabled) {
       setIsAudioPlaybackEnabled(storedAudioPlaybackEnabled === "true");
     }
+    
+    // Load conversations from localStorage
+    const storedConversations = localStorage.getItem("conversations");
+    if (storedConversations) {
+      try {
+        const parsed = JSON.parse(storedConversations);
+        setConversations(parsed);
+      } catch (e) {
+        console.error("Failed to load conversations:", e);
+      }
+    }
+    
+    // Create initial conversation if none exist
+    if (!storedConversations) {
+      const initialConv = {
+        id: `conv_${Date.now()}`,
+        title: "Welcome Chat",
+        lastMessage: "Start your first conversation",
+        timestamp: new Date().toISOString(),
+        createdAt: Date.now(),
+      };
+      setConversations([initialConv]);
+      setCurrentConversationId(initialConv.id);
+    }
   }, []);
 
   useEffect(() => {
@@ -378,6 +483,13 @@ function App() {
   useEffect(() => {
     localStorage.setItem("logsExpanded", isEventsPaneExpanded.toString());
   }, [isEventsPaneExpanded]);
+
+  useEffect(() => {
+    // Save conversations to localStorage whenever they change
+    if (conversations.length > 0) {
+      localStorage.setItem("conversations", JSON.stringify(conversations));
+    }
+  }, [conversations]);
 
   useEffect(() => {
     localStorage.setItem(
@@ -437,8 +549,19 @@ function App() {
   const agentSetKey = searchParams.get("agentConfig") || "default";
 
   return (
-    <div className="text-base flex flex-col h-screen bg-gray-100 text-gray-800 relative">
-      <div className="p-5 text-lg font-semibold flex justify-between items-center">
+    <div className="text-base flex h-screen bg-gray-100 text-gray-800 relative">
+      {/* Sidebar */}
+      <Sidebar
+        conversations={conversations}
+        currentConversationId={currentConversationId}
+        onSelectConversation={handleSelectConversation}
+        onNewConversation={handleNewConversation}
+        onDeleteConversation={handleDeleteConversation}
+      />
+
+      {/* Main Content */}
+      <div className="flex flex-col flex-1 min-w-0">
+        <div className="p-5 text-lg font-semibold flex justify-between items-center">
         <div
           className="flex items-center cursor-pointer"
           onClick={() => window.location.reload()}
@@ -520,17 +643,61 @@ function App() {
       </div>
 
       <div className="flex flex-1 gap-2 px-2 overflow-hidden relative">
-        <Transcript
-          userText={userText}
-          setUserText={setUserText}
-          onSendMessage={handleSendTextMessage}
-          downloadRecording={downloadRecording}
-          canSend={
-            sessionStatus === "CONNECTED"
-          }
-        />
+        {currentView === "main" ? (
+          // Main view with Transcript and Events
+          <>
+            <Transcript
+              userText={userText}
+              setUserText={setUserText}
+              onSendMessage={handleSendTextMessage}
+              downloadRecording={downloadRecording}
+              canSend={
+                sessionStatus === "CONNECTED"
+              }
+            />
 
-        <Events isExpanded={isEventsPaneExpanded} />
+            <Events isExpanded={isEventsPaneExpanded} />
+          </>
+        ) : currentView === "tasks" ? (
+          // Tasks List View
+          <div className="flex-1 min-w-0">
+            <div className="h-full bg-white rounded-xl overflow-hidden flex flex-col">
+              <div className="px-6 py-4 bg-white border-b">
+                <button
+                  onClick={handleBackToMain}
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-3 transition-colors"
+                >
+                  <span>← Back to Main</span>
+                </button>
+                <h1 className="text-2xl font-bold text-gray-900">All Tasks</h1>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <TasksView 
+                  isExpanded={true}
+                  onTaskClick={handleTaskClick}
+                />
+              </div>
+            </div>
+          </div>
+        ) : currentView === "newTask" ? (
+          // New Task Form
+          <div className="flex-1 min-w-0">
+            <NewTaskForm
+              onBack={handleBackToMain}
+              onSubmit={handleNewTaskSubmit}
+            />
+          </div>
+        ) : currentView === "taskDetail" && selectedTask ? (
+          // Task Detail Screen
+          <div className="flex-1 min-w-0">
+            <TaskScreen
+              task={selectedTask}
+              onBack={handleBackFromTask}
+              onRunTask={handleRunTask}
+              onUpdateStatus={handleUpdateTaskStatus}
+            />
+          </div>
+        ) : null}
       </div>
 
       <BottomToolbar
@@ -548,6 +715,7 @@ function App() {
         codec={urlCodec}
         onCodecChange={handleCodecChange}
       />
+      </div>
     </div>
   );
 }
