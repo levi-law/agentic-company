@@ -10,6 +10,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String   // Will store hashed password
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  sessions  Session[]
+  
+  @@map("users")
+}
+
 // Session represents a conversation session with the agent
 model Session {
   id            String    @id @default(cuid())
@@ -18,8 +33,10 @@ model Session {
   agentConfig   String    // e.g., "businessBuilder", "chatSupervisor"
   activeAgent   String?   // Currently active agent name
   status        String    @default("active") // active, completed, archived
+  userId        String?   // Optional: link to user (for anonymous sessions, this can be null)
   
   // Relations
+  user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
   messages      Message[]
   events        Event[]
   businessPlan  BusinessPlan?

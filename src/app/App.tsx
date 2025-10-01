@@ -5,34 +5,22 @@ import { v4 as uuidv4 } from "uuid";
 
 import Image from "next/image";
 
-// UI components
 import Transcript from "./components/Transcript";
 import Events from "./components/Events";
 import BottomToolbar from "./components/BottomToolbar";
 import TasksView from "./components/TasksView";
 import TaskScreen from "./components/TaskScreen";
 import Sidebar from "./components/Sidebar";
-import NewTaskForm from "./components/NewTaskForm";
+import { AuthModal } from "@/app/components/AuthModal";
+import { UserMenu } from "@/app/components/UserMenu";
 
-// Types
-import { SessionStatus } from "@/app/types";
-import type { RealtimeAgent } from '@openai/agents/realtime';
-
-// Context providers & hooks
+import { allAgentSets, defaultAgentSetKey } from "@/app/agentConfigs";
 import { useTranscript } from "@/app/contexts/TranscriptContext";
 import { useEvent } from "@/app/contexts/EventContext";
 import { useTasks } from "@/app/contexts/TasksContext";
-import { useRealtimeSession } from "./hooks/useRealtimeSession";
-import { createModerationGuardrail } from "@/app/agentConfigs/guardrails";
-
-// Agent configs
-import { allAgentSets, defaultAgentSetKey } from "@/app/agentConfigs";
-import { customerServiceRetailScenario } from "@/app/agentConfigs/customerServiceRetail";
-import { chatSupervisorScenario } from "@/app/agentConfigs/chatSupervisor";
-import { customerServiceRetailCompanyName } from "@/app/agentConfigs/customerServiceRetail";
-import { chatSupervisorCompanyName } from "@/app/agentConfigs/chatSupervisor";
-import { simpleHandoffScenario } from "@/app/agentConfigs/simpleHandoff";
-import { businessBuilderScenario, businessBuilderCompanyName } from "@/app/agentConfigs/businessBuilder";
+import { useAuth } from "@/app/contexts/AuthContext";
+import { useSessionPersistence } from "@/app/hooks/useSessionPersistence";
+import { useHandleSessionHistory } from "@/app/hooks/useHandleSessionHistory";
 
 // Map used by connect logic for scenarios defined via the SDK.
 const sdkScenarioMap: Record<string, RealtimeAgent[]> = {
@@ -73,6 +61,10 @@ function App() {
   const { addTasks } = useTasks();
 
   const [selectedAgentName, setSelectedAgentName] = useState<string>("");
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  
+  // Authentication hook
+  const { user, isAuthenticated } = useAuth();
   
   // Session persistence hook
   const {
@@ -600,6 +592,7 @@ function App() {
           className="flex items-center cursor-pointer"
           onClick={() => window.location.reload()}
         >
+          <UserMenu onLoginClick={() => setIsAuthModalOpen(true)} />
           <div>
             <Image
               src="/openai-logomark.svg"
@@ -750,6 +743,12 @@ function App() {
         onCodecChange={handleCodecChange}
       />
       </div>
+      
+      {/* Authentication Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </div>
   );
 }
