@@ -1,0 +1,147 @@
+// Prisma schema for Agentic Company platform
+// Supports PostgreSQL for production-grade persistence
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Session represents a conversation session with the agent
+model Session {
+  id            String    @id @default(cuid())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  agentConfig   String    // e.g., "businessBuilder", "chatSupervisor"
+  activeAgent   String?   // Currently active agent name
+  status        String    @default("active") // active, completed, archived
+  
+  // Relations
+  messages      Message[]
+  events        Event[]
+  businessPlan  BusinessPlan?
+  tasks         Task[]
+  
+  @@index([createdAt])
+  @@index([status])
+}
+
+// Message stores transcript messages (user and assistant)
+model Message {
+  id            String    @id @default(cuid())
+  sessionId     String
+  createdAt     DateTime  @default(now())
+  role          String    // user, assistant, system
+  content       String    @db.Text
+  isSimulated   Boolean   @default(false)
+  metadata      Json?     // Additional metadata
+  
+  session       Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  @@index([sessionId, createdAt])
+}
+
+// Event stores all realtime API events for debugging and replay
+model Event {
+  id            String    @id @default(cuid())
+  sessionId     String
+  createdAt     DateTime  @default(now())
+  direction     String    // client, server
+  eventName     String
+  eventData     Json      // Full event payload
+  
+  session       Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  @@index([sessionId, createdAt])
+  @@index([eventName])
+}
+
+// BusinessPlan stores the generated business plan
+model BusinessPlan {
+  id                String    @id @default(cuid())
+  sessionId         String    @unique
+  businessId        String    @unique
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  businessName      String
+  businessIdea      String    @db.Text
+  targetMarket      String    @db.Text
+  revenueModel      String    @db.Text
+  timeline          String
+  budget            String
+  
+  // Business plan details
+  technicalPlan     Json?
+  marketingPlan     Json?
+  salesPlan         Json?
+  legalPlan         Json?
+  financePlan       Json?
+  operationsPlan    Json?
+  hrPlan            Json?
+  
+  currentPhase      String    @default("discovery") // discovery, planning, execution
+  conversationSummary String? @db.Text
+  
+  session           Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  @@index([businessId])
+  @@index([createdAt])
+}
+
+// Task stores individual tasks across all departments
+model Task {
+  id                String    @id // e.g., "tech_001", "mkt_001"
+  sessionId         String
+  businessId        String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  department        String    // Technical, Marketing, Sales, Legal, Finance, Operations, HR
+  title             String
+  description       String    @db.Text
+  assignedTo        String    // Agent name
+  reviewedBy        String    // QA agent name
+  priority          String    // critical, high, medium, low
+  estimatedHours    Int
+  status            String    @default("pending") // pending, in_progress, completed, blocked
+  progress          Int?      // 0-100
+  blockers          String?   @db.Text
+  dependencies      String[]  // Array of task IDs
+  
+  // Execution tracking
+  startedAt         DateTime?
+  completedAt       DateTime?
+  actualHours       Int?
+  
+  session           Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  @@index([sessionId, status])
+  @@index([businessId])
+  @@index([department])
+  @@index([status])
+}
+
+// ApprovalRequest stores requests for human approval
+model ApprovalRequest {
+  id                String    @id @default(cuid())
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  sessionId         String
+  businessId        String?
+  requestType       String    // plan_approval, execution_approval, budget_approval
+  title             String
+  description       String    @db.Text
+  details           Json?
+  
+  status            String    @default("pending") // pending, approved, rejected
+  response          String?   @db.Text
+  respondedAt       DateTime?
+  
+  @@index([sessionId, status])
+  @@index([status])
+}

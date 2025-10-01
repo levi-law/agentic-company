@@ -24,12 +24,23 @@ Every production agent is paired with a QA/Review agent for quality assurance:
 
 ## Quick Start
 
+### Option 1: Quick Setup (No Database)
 1. Install dependencies: `npm i`
 2. Add your `OPENAI_API_KEY` to `.env` (copy from `.env.sample`)
 3. Start the server: `npm run dev`
 4. Open [http://localhost:3000](http://localhost:3000)
 5. Select "businessBuilder" from the Scenario dropdown
 6. Connect and describe your business idea to the CEO Agent
+
+### Option 2: Full Setup (With Database Persistence)
+1. Run the setup script: `./setup-database.sh`
+2. Follow the prompts to configure your database
+3. Start the server: `npm run dev`
+4. Open [http://localhost:3000](http://localhost:3000)
+
+**Note**: With database persistence enabled, all conversations, tasks, and business plans are automatically saved and can be resumed later.
+
+For detailed database setup instructions, see [DATABASE_SETUP.md](./DATABASE_SETUP.md) and [DATABASE_INTEGRATION.md](./DATABASE_INTEGRATION.md).
 
 ## What You Get
 
