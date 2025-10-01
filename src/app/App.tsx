@@ -10,6 +10,7 @@ import Transcript from "./components/Transcript";
 import Events from "./components/Events";
 import BottomToolbar from "./components/BottomToolbar";
 import TasksView from "./components/TasksView";
+import TaskScreen from "./components/TaskScreen";
 
 // Types
 import { SessionStatus } from "@/app/types";
@@ -112,6 +113,7 @@ function App() {
     useState<boolean>(true);
   const [isTasksViewExpanded, setIsTasksViewExpanded] =
     useState<boolean>(true);
+  const [selectedTask, setSelectedTask] = useState<any | null>(null);
   const [userText, setUserText] = useState<string>("");
   const [isPTTActive, setIsPTTActive] = useState<boolean>(false);
   const [isPTTUserSpeaking, setIsPTTUserSpeaking] = useState<boolean>(false);
@@ -357,6 +359,30 @@ function App() {
     window.location.replace(url.toString());
   };
 
+  const handleTaskClick = (task: any) => {
+    setSelectedTask(task);
+  };
+
+  const handleBackFromTask = () => {
+    setSelectedTask(null);
+  };
+
+  const handleRunTask = (taskId: string) => {
+    console.log("Running task:", taskId);
+    // In a real implementation, this would trigger task execution
+    if (selectedTask && selectedTask.id === taskId) {
+      setSelectedTask({ ...selectedTask, status: "in_progress" });
+    }
+  };
+
+  const handleUpdateTaskStatus = (taskId: string, status: string) => {
+    console.log("Updating task status:", taskId, status);
+    // In a real implementation, this would update the task in the backend
+    if (selectedTask && selectedTask.id === taskId) {
+      setSelectedTask({ ...selectedTask, status });
+    }
+  };
+
   useEffect(() => {
     const storedPushToTalkUI = localStorage.getItem("pushToTalkUI");
     if (storedPushToTalkUI) {
@@ -531,19 +557,37 @@ function App() {
       </div>
 
       <div className="flex flex-1 gap-2 px-2 overflow-hidden relative">
-        <Transcript
-          userText={userText}
-          setUserText={setUserText}
-          onSendMessage={handleSendTextMessage}
-          downloadRecording={downloadRecording}
-          canSend={
-            sessionStatus === "CONNECTED"
-          }
-        />
+        {selectedTask ? (
+          // Task Detail Screen
+          <div className="flex-1 min-w-0">
+            <TaskScreen
+              task={selectedTask}
+              onBack={handleBackFromTask}
+              onRunTask={handleRunTask}
+              onUpdateStatus={handleUpdateTaskStatus}
+            />
+          </div>
+        ) : (
+          // Normal view with Transcript, Tasks, and Events
+          <>
+            <Transcript
+              userText={userText}
+              setUserText={setUserText}
+              onSendMessage={handleSendTextMessage}
+              downloadRecording={downloadRecording}
+              canSend={
+                sessionStatus === "CONNECTED"
+              }
+            />
 
-        <TasksView isExpanded={isTasksViewExpanded} />
+            <TasksView 
+              isExpanded={isTasksViewExpanded}
+              onTaskClick={handleTaskClick}
+            />
 
-        <Events isExpanded={isEventsPaneExpanded} />
+            <Events isExpanded={isEventsPaneExpanded} />
+          </>
+        )}
       </div>
 
       <BottomToolbar

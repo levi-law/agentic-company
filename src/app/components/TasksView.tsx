@@ -31,9 +31,10 @@ interface Task {
 
 interface TasksViewProps {
   isExpanded: boolean;
+  onTaskClick?: (task: Task) => void;
 }
 
-const TasksView: React.FC<TasksViewProps> = ({ isExpanded }) => {
+const TasksView: React.FC<TasksViewProps> = ({ isExpanded, onTaskClick }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
@@ -288,6 +289,17 @@ const TasksView: React.FC<TasksViewProps> = ({ isExpanded }) => {
     setExpandedTaskId((prev) => (prev === taskId ? null : taskId));
   };
 
+  const handleTaskClick = (task: Task, e: React.MouseEvent) => {
+    // If clicking on action buttons, don't navigate
+    if ((e.target as HTMLElement).closest('button')) {
+      return;
+    }
+    
+    if (onTaskClick) {
+      onTaskClick(task);
+    }
+  };
+
   const taskStats = {
     total: tasks.length,
     pending: tasks.filter((t) => t.status === "pending").length,
@@ -383,12 +395,10 @@ const TasksView: React.FC<TasksViewProps> = ({ isExpanded }) => {
             return (
               <div
                 key={task.id}
-                className="border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                className="border border-gray-200 rounded-lg hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer"
+                onClick={(e) => handleTaskClick(task, e)}
               >
-                <div
-                  className="p-3 cursor-pointer"
-                  onClick={() => toggleTaskExpansion(task.id)}
-                >
+                <div className="p-3">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-start gap-2 flex-1">
                       <div className="mt-0.5">{getStatusIcon(task.status)}</div>
@@ -431,67 +441,21 @@ const TasksView: React.FC<TasksViewProps> = ({ isExpanded }) => {
                   </div>
                 </div>
 
-                {/* Expanded Details */}
-                {isExpanded && (
-                  <div className="border-t border-gray-200 p-3 bg-gray-50 space-y-2">
-                    <div className="text-xs">
-                      <div className="flex justify-between mb-1">
-                        <span className="text-gray-600">Assigned To:</span>
-                        <span className="font-medium">{task.assignedTo}</span>
-                      </div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-gray-600">Reviewed By:</span>
-                        <span className="font-medium">{task.reviewedBy}</span>
-                      </div>
-                      {task.dependencies.length > 0 && (
-                        <div className="flex justify-between mb-1">
-                          <span className="text-gray-600">Dependencies:</span>
-                          <span className="font-medium">
-                            {task.dependencies.join(", ")}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {task.status === "pending" && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRunTask(task.id);
-                        }}
-                        className="w-full mt-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md flex items-center justify-center gap-2 transition-colors"
-                      >
-                        <PlayIcon />
-                        Run Task
-                      </button>
-                    )}
-
-                    {task.status === "in_progress" && (
-                      <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
-                        Task is currently in progress...
-                      </div>
-                    )}
-
-                    {task.status === "completed" && (
-                      <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-xs text-green-800 flex items-center gap-2">
-                        <CheckCircledIcon />
-                        Task completed successfully
-                      </div>
-                    )}
-
-                    {task.status === "blocked" && task.blockers && (
-                      <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-800">
-                        <div className="font-semibold mb-1">Blocked:</div>
-                        {task.blockers}
-                      </div>
-                    )}
-                  </div>
-                )}
+                </div>
               </div>
             );
           })
         )}
       </div>
+
+      {/* Click instruction hint */}
+      {filteredTasks.length > 0 && (
+        <div className="px-4 py-2 bg-blue-50 border-t border-blue-200 text-center">
+          <p className="text-xs text-blue-700">
+            💡 Click on any task to view full details
+          </p>
+        </div>
+      )}
     </div>
   );
 };
