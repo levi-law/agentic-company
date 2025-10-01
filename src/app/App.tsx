@@ -146,7 +146,7 @@ function App() {
 
   const sendClientEvent = (eventObj: any, eventNameSuffix = "") => {
     try {
-      sendEvent(eventObj);
+      // sendEvent(eventObj); // SDK function commented out for deployment
       logClientEvent(eventObj, eventNameSuffix);
       
       // Save event to database
@@ -316,12 +316,12 @@ function App() {
           create_response: true,
         };
 
-    sendEvent({
-      type: 'session.update',
-      session: {
-        turn_detection: turnDetection,
-      },
-    });
+    // sendEvent({ // SDK function commented out for deployment
+    //   type: 'session.update',
+    //   session: {
+    //     turn_detection: turnDetection,
+    //   },
+    // });
 
     // Send an initial 'hi' message to trigger the agent to greet the user
     if (shouldTriggerResponse) {
