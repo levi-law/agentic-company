@@ -17,7 +17,15 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
 
   // Initialize or restore session
   useEffect(() => {
-    if (!enabled || sessionInitialized.current) return;
+    if (!enabled) return;
+    if (sessionInitialized.current) {
+      console.log('[Session] Already initialized, skipping');
+      return;
+    }
+    if (sessionId) {
+      console.log('[Session] Session already exists, skipping initialization');
+      return;
+    }
 
     const initializeSession = async () => {
       setIsLoading(true);
@@ -89,7 +97,8 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
     };
 
     initializeSession();
-  }, [agentConfig, activeAgent, enabled, isAuthenticated, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled]); // Only re-run if enabled changes
 
   // Update active agent when it changes
   useEffect(() => {
