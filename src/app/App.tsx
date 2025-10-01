@@ -306,17 +306,18 @@ function App() {
     // Reflect Push-to-Talk UI state by (de)activating server VAD on the
     // backend. The Realtime SDK supports live session updates via the
     // `session.update` event.
-    const turnDetection = isPTTActive
-      ? null
-      : {
-          type: 'server_vad',
-          threshold: 0.9,
-          prefix_padding_ms: 300,
-          silence_duration_ms: 500,
-          create_response: true,
-        };
+    // SDK function commented out for deployment
+    // const turnDetection = isPTTActive
+    //   ? null
+    //   : {
+    //       type: 'server_vad',
+    //       threshold: 0.9,
+    //       prefix_padding_ms: 300,
+    //       silence_duration_ms: 500,
+    //       create_response: true,
+    //     };
 
-    // sendEvent({ // SDK function commented out for deployment
+    // sendEvent({
     //   type: 'session.update',
     //   session: {
     //     turn_detection: turnDetection,
