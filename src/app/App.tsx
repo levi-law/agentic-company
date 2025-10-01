@@ -239,45 +239,47 @@ function App() {
   };
 
   const connectToRealtime = async () => {
-    const agentSetKey = searchParams.get("agentConfig") || "default";
-    if (sdkScenarioMap[agentSetKey]) {
-      if (sessionStatus !== "DISCONNECTED") return;
-      setSessionStatus("CONNECTING");
+    // SDK connection commented out for deployment
+    console.log('SDK connection not available in this deployment');
+    // const agentSetKey = searchParams.get("agentConfig") || "default";
+    // if (sdkScenarioMap[agentSetKey]) {
+    //   if (sessionStatus !== "DISCONNECTED") return;
+    //   setSessionStatus("CONNECTING");
 
-      try {
-        const EPHEMERAL_KEY = await fetchEphemeralKey();
-        if (!EPHEMERAL_KEY) return;
+    //   try {
+    //     const EPHEMERAL_KEY = await fetchEphemeralKey();
+    //     if (!EPHEMERAL_KEY) return;
 
-        // Ensure the selectedAgentName is first so that it becomes the root
-        const reorderedAgents = [...sdkScenarioMap[agentSetKey]];
-        const idx = reorderedAgents.findIndex((a) => a.name === selectedAgentName);
-        if (idx > 0) {
-          const [agent] = reorderedAgents.splice(idx, 1);
-          reorderedAgents.unshift(agent);
-        }
+    //     // Ensure the selectedAgentName is first so that it becomes the root
+    //     const reorderedAgents = [...sdkScenarioMap[agentSetKey]];
+    //     const idx = reorderedAgents.findIndex((a) => a.name === selectedAgentName);
+    //     if (idx > 0) {
+    //       const [agent] = reorderedAgents.splice(idx, 1);
+    //       reorderedAgents.unshift(agent);
+    //     }
 
-        const companyName = agentSetKey === 'customerServiceRetail'
-          ? customerServiceRetailCompanyName
-          : agentSetKey === 'businessBuilder'
-          ? businessBuilderCompanyName
-          : chatSupervisorCompanyName;
-        const guardrail = createModerationGuardrail(companyName);
+    //     const companyName = agentSetKey === 'customerServiceRetail'
+    //       ? customerServiceRetailCompanyName
+    //       : agentSetKey === 'businessBuilder'
+    //       ? businessBuilderCompanyName
+    //       : chatSupervisorCompanyName;
+    //     const guardrail = createModerationGuardrail(companyName);
 
-        await connect({
-          getEphemeralKey: async () => EPHEMERAL_KEY,
-          initialAgents: reorderedAgents,
-          audioElement: sdkAudioElement,
-          outputGuardrails: [guardrail],
-          extraContext: {
-            addTranscriptBreadcrumb,
-          },
-        });
-      } catch (err) {
-        console.error("Error connecting via SDK:", err);
-        setSessionStatus("DISCONNECTED");
-      }
-      return;
-    }
+    //     await connect({
+    //       getEphemeralKey: async () => EPHEMERAL_KEY,
+    //       initialAgents: reorderedAgents,
+    //       audioElement: sdkAudioElement,
+    //       outputGuardrails: [guardrail],
+    //       extraContext: {
+    //         addTranscriptBreadcrumb,
+    //       },
+    //     });
+    //   } catch (err) {
+    //     console.error("Error connecting via SDK:", err);
+    //     setSessionStatus("DISCONNECTED");
+    //   }
+    //   return;
+    // }
   };
 
   const disconnectFromRealtime = () => {
