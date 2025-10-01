@@ -37,22 +37,31 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'login' }: AuthModalP
     setIsLoading(true);
     setError('');
 
+    console.log('[AuthModal] Submitting form, mode:', mode);
+
     try {
       let result;
       
       if (mode === 'login') {
+        console.log('[AuthModal] Attempting login with:', emailOrUsername);
         result = await login(emailOrUsername, password);
       } else {
+        console.log('[AuthModal] Attempting registration with:', { email, username });
         result = await register(email, username, password, name);
       }
 
+      console.log('[AuthModal] Result:', result);
+
       if (result.success) {
+        console.log('[AuthModal] Success! Closing modal');
         resetForm();
         onClose();
       } else {
+        console.error('[AuthModal] Failed:', result.error);
         setError(result.error || 'An error occurred');
       }
-    } catch {
+    } catch (err) {
+      console.error('[AuthModal] Exception:', err);
       setError('An unexpected error occurred');
     } finally {
       setIsLoading(false);

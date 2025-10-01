@@ -51,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (emailOrUsername: string, password: string) => {
+    console.log('[AuthContext] Login attempt for:', emailOrUsername);
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -61,21 +62,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ emailOrUsername, password }),
       });
 
+      console.log('[AuthContext] Login response status:', response.status);
       const data = await response.json();
+      console.log('[AuthContext] Login response data:', data);
 
       if (response.ok) {
         setUser(data.user);
+        console.log('[AuthContext] User set:', data.user);
         return { success: true };
       } else {
+        console.error('[AuthContext] Login failed:', data.error);
         return { success: false, error: data.error || 'Login failed' };
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('[AuthContext] Login error:', error);
       return { success: false, error: 'Network error' };
     }
   };
 
   const register = async (email: string, username: string, password: string, name?: string) => {
+    console.log('[AuthContext] Registration attempt for:', { email, username });
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -86,16 +92,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ email, username, password, name }),
       });
 
+      console.log('[AuthContext] Registration response status:', response.status);
       const data = await response.json();
+      console.log('[AuthContext] Registration response data:', data);
 
       if (response.ok) {
         setUser(data.user);
+        console.log('[AuthContext] User registered and set:', data.user);
         return { success: true };
       } else {
+        console.error('[AuthContext] Registration failed:', data.error);
         return { success: false, error: data.error || 'Registration failed' };
       }
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('[AuthContext] Registration error:', error);
       return { success: false, error: 'Network error' };
     }
   };
