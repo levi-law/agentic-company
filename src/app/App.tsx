@@ -76,11 +76,8 @@ function App() {
   
   // Session persistence hook
   const {
-    sessionId,
-    saveMessage,
     saveEvent,
     saveTasks,
-    saveBusinessPlan,
   } = useSessionPersistence({
     agentConfig: agentSetKey,
     activeAgent: selectedAgentName,
@@ -173,16 +170,14 @@ function App() {
         saveTasks(tasks);
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onTasksGenerated]);
+  }, [onTasksGenerated, addTasks, saveTasks]);
 
   // Register callback to save events to database
   useEffect(() => {
     if (setSaveEventCallback) {
       setSaveEventCallback(saveEvent);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setSaveEventCallback]);
+  }, [setSaveEventCallback, saveEvent]);
 
   useEffect(() => {
     let finalAgentConfig = searchParams.get("agentConfig");

@@ -2,7 +2,6 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { useEvent } from "@/app/contexts/EventContext";
-import { useTasks } from "@/app/contexts/TasksContext";
 import { LoggedEvent } from "@/app/types";
 import Tasks from "./Tasks";
 

@@ -66,8 +66,8 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
     const updateActiveAgent = async () => {
       try {
         await dbService.updateSession(sessionId, { activeAgent });
-      } catch (err) {
-        console.error('[Session] Failed to update active agent:', err);
+      } catch (error) {
+        console.error('[Session] Failed to update active agent:', error);
       }
     };
 
