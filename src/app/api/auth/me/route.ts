@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
-import jwt from 'jsonwebtoken';
+import { verifyJWT } from '@/app/lib/jwt';
 
 export const runtime = 'edge';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,11 +18,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Verify token
-    const decoded = jwt.verify(token, JWT_SECRET) as {
-      userId: string;
-      email: string;
-      username: string;
-    };
+    const decoded = await verifyJWT(token) as { userId: string; email: string; username: string };
 
     // Get user from database
     const user = await prisma.user.findUnique({

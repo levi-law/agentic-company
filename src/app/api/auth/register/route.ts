@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import { signJWT } from '@/app/lib/jwt';
 
 export const runtime = 'edge';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 export async function POST(request: NextRequest) {
   try {
@@ -65,17 +64,22 @@ export async function POST(request: NextRequest) {
     });
 
     // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, username: user.username },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const token = await signJWT({
+      userId: user.id,
+      email: user.email,
+      username: user.username
+    });
 
     // Create response with token in HTTP-only cookie
     const response = NextResponse.json({
       success: true,
-      user,
-      message: 'User created successfully'
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        name: user.name,
+        createdAt: user.createdAt
+      },
     }, { status: 201 });
 
     response.cookies.set('auth-token', token, {
