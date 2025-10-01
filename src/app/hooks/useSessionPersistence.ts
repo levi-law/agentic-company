@@ -10,9 +10,10 @@ interface UseSessionPersistenceProps {
 
 // Global promise tracker to prevent duplicate session creation across all instances
 let initializationPromise: Promise<string> | null = null;
+let globalSessionId: string | null = null;
 
 export function useSessionPersistence({ agentConfig, activeAgent, enabled = true }: UseSessionPersistenceProps) {
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(() => globalSessionId);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const sessionInitialized = useRef(false);
@@ -22,6 +23,15 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
   // Initialize or restore session
   useEffect(() => {
     if (!enabled) return;
+    
+    // If we already have a global session, use it
+    if (globalSessionId) {
+      console.log('[Session] Using existing global session:', globalSessionId);
+      setSessionId(globalSessionId);
+      dbService.setSessionId(globalSessionId);
+      sessionInitialized.current = true;
+      return;
+    }
     
     // Strong guard: prevent multiple initializations
     if (sessionInitialized.current) {
@@ -43,6 +53,7 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
         console.log('[Session] Waiting for existing initialization...');
         try {
           const existingSessionId = await initializationPromise;
+          globalSessionId = existingSessionId;
           setSessionId(existingSessionId);
           dbService.setSessionId(existingSessionId);
           sessionInitialized.current = true;
@@ -70,6 +81,7 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
                 console.log('[Session] Linked anonymous session to user:', user.id);
               }
               
+              globalSessionId = storedSessionId;
               setSessionId(storedSessionId);
               dbService.setSessionId(storedSessionId);
               console.log('[Session] Restored session from localStorage:', storedSessionId);
@@ -96,6 +108,7 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
             );
             
             if (activeSession) {
+              globalSessionId = activeSession.id;
               setSessionId(activeSession.id);
               dbService.setSessionId(activeSession.id);
               localStorage.setItem('currentSessionId', activeSession.id);
@@ -116,6 +129,7 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
           activeAgent, 
           isAuthenticated && user ? user.id : undefined
         );
+        globalSessionId = newSession.id;
         setSessionId(newSession.id);
         dbService.setSessionId(newSession.id);
         localStorage.setItem('currentSessionId', newSession.id);
@@ -239,6 +253,7 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
     try {
       await dbService.updateSession(sessionId, { status: 'completed' });
       localStorage.removeItem('currentSessionId');
+      globalSessionId = null;
       setSessionId(null);
       sessionInitialized.current = false;
       initializationInProgress.current = false;
