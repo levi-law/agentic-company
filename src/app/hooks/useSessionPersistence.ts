@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { dbService } from '@/app/lib/dbService';
+import { useAuth } from '@/app/contexts/AuthContext';
 
 interface UseSessionPersistenceProps {
   agentConfig: string;
@@ -12,6 +13,7 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const sessionInitialized = useRef(false);
+  const { user, isAuthenticated } = useAuth();
 
   // Initialize or restore session
   useEffect(() => {
@@ -22,7 +24,27 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
       setError(null);
 
       try {
-        // Check if there's a session ID in localStorage
+        // If user is authenticated, try to find their most recent active session first
+        if (isAuthenticated && user) {
+          try {
+            const userSessions = await dbService.getUserSessions(user.id);
+            const activeSession = userSessions.find((s: any) => s.status === 'active' && s.agentConfig === agentConfig);
+            
+            if (activeSession) {
+              setSessionId(activeSession.id);
+              dbService.setSessionId(activeSession.id);
+              localStorage.setItem('currentSessionId', activeSession.id);
+              console.log('[Session] Restored user session:', activeSession.id);
+              sessionInitialized.current = true;
+              setIsLoading(false);
+              return;
+            }
+          } catch (error) {
+            console.warn('[Session] Failed to load user sessions:', error);
+          }
+        }
+
+        // Check if there's a session ID in localStorage (for anonymous users or fallback)
         const storedSessionId = localStorage.getItem('currentSessionId');
         
         if (storedSessionId) {
@@ -30,6 +52,12 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
           try {
             const session = await dbService.getSession(storedSessionId);
             if (session && session.status === 'active') {
+              // If user is authenticated, link this session to them
+              if (isAuthenticated && user && !session.userId) {
+                await dbService.linkSessionToUser(storedSessionId, user.id);
+                console.log('[Session] Linked anonymous session to user:', user.id);
+              }
+              
               setSessionId(storedSessionId);
               dbService.setSessionId(storedSessionId);
               console.log('[Session] Restored session:', storedSessionId);
@@ -42,11 +70,15 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
           }
         }
 
-        // Create new session
-        const newSession = await dbService.createSession(agentConfig, activeAgent);
+        // Create new session (linked to user if authenticated)
+        const newSession = await dbService.createSession(
+          agentConfig, 
+          activeAgent, 
+          isAuthenticated && user ? user.id : undefined
+        );
         setSessionId(newSession.id);
         localStorage.setItem('currentSessionId', newSession.id);
-        console.log('[Session] Created new session:', newSession.id);
+        console.log('[Session] Created new session:', newSession.id, isAuthenticated ? `for user: ${user?.id}` : '(anonymous)');
         sessionInitialized.current = true;
       } catch (err) {
         console.error('[Session] Failed to initialize session:', err);
@@ -57,7 +89,7 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
     };
 
     initializeSession();
-  }, [agentConfig, activeAgent, enabled]);
+  }, [agentConfig, activeAgent, enabled, isAuthenticated, user]);
 
   // Update active agent when it changes
   useEffect(() => {

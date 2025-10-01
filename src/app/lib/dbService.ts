@@ -1,21 +1,20 @@
 // Database service layer for client-side operations
-// This wraps API calls to the database endpoints
 
 export class DatabaseService {
   private sessionId: string | null = null;
 
   // Session Management
-  async createSession(agentConfig: string, activeAgent: string): Promise<any> {
+  async createSession(agentConfig: string, activeAgent?: string, userId?: string): Promise<any> {
     const response = await fetch('/api/db/session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ agentConfig, activeAgent }),
+      body: JSON.stringify({ agentConfig, activeAgent, userId }),
     });
     
     if (!response.ok) throw new Error('Failed to create session');
-    const session = await response.json();
-    this.sessionId = session.id;
-    return session;
+    const data = await response.json();
+    this.sessionId = data.id;
+    return data;
   }
 
   async getSession(sessionId: string): Promise<any> {
@@ -38,6 +37,24 @@ export class DatabaseService {
   async getAllSessions(): Promise<any[]> {
     const response = await fetch('/api/db/session');
     if (!response.ok) throw new Error('Failed to fetch sessions');
+    return response.json();
+  }
+
+  async getUserSessions(userId: string): Promise<any[]> {
+    const response = await fetch(`/api/db/session?userId=${userId}`);
+    if (!response.ok) throw new Error('Failed to fetch user sessions');
+    const data = await response.json();
+    return Array.isArray(data) ? data : [data];
+  }
+
+  async linkSessionToUser(sessionId: string, userId: string): Promise<any> {
+    const response = await fetch('/api/db/session', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId, userId }),
+    });
+    
+    if (!response.ok) throw new Error('Failed to link session to user');
     return response.json();
   }
 

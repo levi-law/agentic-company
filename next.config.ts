@@ -1,31 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Configure for Cloudflare Pages with full-stack support
-  experimental: {
-    // Enable experimental features as needed
-  },
+  // Standard Next.js configuration for single-server deployment
   
-  // Disable webpack cache for Cloudflare deployment to avoid large files
-  webpack: (config, { isServer }) => {
-    if (process.env.CF_PAGES) {
-      config.cache = false;
-    }
-    return config;
-  },
-  
-  // Image optimization settings for Cloudflare
+  // Enable image optimization (works on standard Node.js servers)
   images: {
-    unoptimized: true, // Disable Next.js image optimization for Cloudflare
+    domains: [], // Add your image domains here if needed
   },
   
   // Environment variables
   env: {
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   },
-  
-  // Configure for Cloudflare Pages with full-stack support
-  // Use default output to support API routes via Cloudflare Functions
   
   // Security headers
   async headers() {
