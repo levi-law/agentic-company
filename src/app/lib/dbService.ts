@@ -2,19 +2,35 @@
 
 export class DatabaseService {
   private sessionId: string | null = null;
+  private createSessionPromise: Promise<any> | null = null;
 
   // Session Management
   async createSession(agentConfig: string, activeAgent?: string, userId?: string): Promise<any> {
-    const response = await fetch('/api/db/session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ agentConfig, activeAgent, userId }),
-    });
-    
-    if (!response.ok) throw new Error('Failed to create session');
-    const data = await response.json();
-    this.sessionId = data.id;
-    return data;
+    // Prevent duplicate session creation requests
+    if (this.createSessionPromise) {
+      console.log('[dbService] Reusing existing createSession request');
+      return this.createSessionPromise;
+    }
+
+    this.createSessionPromise = (async () => {
+      try {
+        const response = await fetch('/api/db/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ agentConfig, activeAgent, userId }),
+        });
+        
+        if (!response.ok) throw new Error('Failed to create session');
+        const data = await response.json();
+        this.sessionId = data.id;
+        return data;
+      } finally {
+        // Clear the promise after completion
+        this.createSessionPromise = null;
+      }
+    })();
+
+    return this.createSessionPromise;
   }
 
   async getSession(sessionId: string): Promise<any> {
