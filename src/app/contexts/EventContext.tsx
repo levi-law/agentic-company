@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, FC, PropsWithChildren, useEffect } from "react";
+import React, { createContext, useContext, useState, useRef, FC, PropsWithChildren } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { LoggedEvent } from "@/app/types";
 
@@ -18,8 +18,8 @@ const EventContext = createContext<EventContextValue | undefined>(undefined);
 
 export const EventProvider: FC<PropsWithChildren> = ({ children }) => {
   const [loggedEvents, setLoggedEvents] = useState<LoggedEvent[]>([]);
-  const [onTasksGeneratedCallback, setOnTasksGeneratedCallback] = useState<((tasks: any[]) => void) | undefined>(undefined);
-  const [saveEventCallback, setSaveEventCallbackState] = useState<((direction: 'client' | 'server', eventName: string, eventData: any) => void) | undefined>(undefined);
+  const onTasksGeneratedCallbackRef = useRef<((tasks: any[]) => void) | undefined>(undefined);
+  const saveEventCallbackRef = useRef<((direction: 'client' | 'server', eventName: string, eventData: any) => void) | undefined>(undefined);
 
   function addLoggedEvent(direction: "client" | "server", eventName: string, eventData: Record<string, any>) {
     const id = eventData.event_id || uuidv4();
@@ -31,14 +31,14 @@ export const EventProvider: FC<PropsWithChildren> = ({ children }) => {
         eventData.status === "done" &&
         eventData.output?.tasks) {
       // Notify about tasks being generated
-      if (onTasksGeneratedCallback) {
-        onTasksGeneratedCallback(eventData.output.tasks);
+      if (onTasksGeneratedCallbackRef.current) {
+        onTasksGeneratedCallbackRef.current(eventData.output.tasks);
       }
     }
     
     // Save to database if callback is set
-    if (saveEventCallback) {
-      saveEventCallback(direction, eventName, eventData);
+    if (saveEventCallbackRef.current) {
+      saveEventCallbackRef.current(direction, eventName, eventData);
     }
     
     setLoggedEvents((prev) => [
@@ -88,11 +88,11 @@ export const EventProvider: FC<PropsWithChildren> = ({ children }) => {
 
 
   const registerTasksCallback = (callback: (tasks: any[]) => void) => {
-    setOnTasksGeneratedCallback(() => callback);
+    onTasksGeneratedCallbackRef.current = callback;
   };
 
   const setSaveEventCallback = (callback: (direction: 'client' | 'server', eventName: string, eventData: any) => void) => {
-    setSaveEventCallbackState(() => callback);
+    saveEventCallbackRef.current = callback;
   };
 
   return (

@@ -37,7 +37,8 @@ echo ""
 echo "Choose setup method:"
 echo "1) Push schema to database (recommended for development)"
 echo "2) Create migration (recommended for production)"
-read -p "Enter choice (1 or 2): " choice
+# read -p "Enter choice (1 or 2): " choice
+choice=1
 
 case $choice in
     1)

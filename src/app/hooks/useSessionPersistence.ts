@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { dbService } from '@/app/lib/dbService';
 
 interface UseSessionPersistenceProps {
@@ -75,7 +75,7 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
   }, [sessionId, activeAgent, enabled]);
 
   // Save message to database
-  const saveMessage = async (role: 'user' | 'assistant', content: string, isSimulated = false, metadata?: any) => {
+  const saveMessage = useCallback(async (role: 'user' | 'assistant', content: string, isSimulated = false, metadata?: any) => {
     if (!sessionId || !enabled) return;
 
     try {
@@ -83,10 +83,10 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
     } catch (err) {
       console.error('[Session] Failed to save message:', err);
     }
-  };
+  }, [sessionId, enabled]);
 
   // Save event to database
-  const saveEvent = async (direction: 'client' | 'server', eventName: string, eventData: any) => {
+  const saveEvent = useCallback(async (direction: 'client' | 'server', eventName: string, eventData: any) => {
     if (!sessionId || !enabled) return;
 
     try {
@@ -94,10 +94,10 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
     } catch (err) {
       console.error('[Session] Failed to save event:', err);
     }
-  };
+  }, [sessionId, enabled]);
 
   // Save tasks to database
-  const saveTasks = async (tasks: any[], businessId?: string) => {
+  const saveTasks = useCallback(async (tasks: any[], businessId?: string) => {
     if (!sessionId || !enabled) return;
 
     try {
@@ -105,10 +105,10 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
     } catch (err) {
       console.error('[Session] Failed to save tasks:', err);
     }
-  };
+  }, [sessionId, enabled]);
 
   // Save business plan to database
-  const saveBusinessPlan = async (businessPlan: any) => {
+  const saveBusinessPlan = useCallback(async (businessPlan: any) => {
     if (!sessionId || !enabled) return;
 
     try {
@@ -116,7 +116,7 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
     } catch (err) {
       console.error('[Session] Failed to save business plan:', err);
     }
-  };
+  }, [sessionId, enabled]);
 
   // Load session history
   const loadSessionHistory = async (sessionIdToLoad: string) => {

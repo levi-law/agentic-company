@@ -173,14 +173,16 @@ function App() {
         saveTasks(tasks);
       });
     }
-  }, [onTasksGenerated, addTasks, saveTasks]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onTasksGenerated]);
 
   // Register callback to save events to database
   useEffect(() => {
     if (setSaveEventCallback) {
       setSaveEventCallback(saveEvent);
     }
-  }, [setSaveEventCallback, saveEvent]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setSaveEventCallback]);
 
   useEffect(() => {
     let finalAgentConfig = searchParams.get("agentConfig");
