@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// export const runtime = 'edge'; // Removed for standard Node.js deployment
 
 // Proxy endpoint for the OpenAI Responses API
 export async function POST(req: NextRequest) {

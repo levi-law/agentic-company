@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
 
-// // export const runtime = 'edge'; // Commented out for local dev - Prisma doesn't support Edge Runtime locally // Commented out for local dev - Prisma doesn't support Edge Runtime locally
 
 // GET /api/db/session - Get all sessions
 export async function GET(request: NextRequest) {

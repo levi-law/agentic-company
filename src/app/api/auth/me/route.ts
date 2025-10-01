@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/app/lib/db';
 import { verifyJWT } from '@/app/lib/jwt';
 
-// export const runtime = 'edge'; // Commented out for local dev - Prisma doesn't support Edge Runtime locally
 
 
 export async function GET(request: NextRequest) {
