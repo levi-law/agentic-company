@@ -22,6 +22,7 @@ import { useTasks } from "@/app/contexts/TasksContext";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useSessionPersistence } from "@/app/hooks/useSessionPersistence";
 import { useHandleSessionHistory } from "@/app/hooks/useHandleSessionHistory";
+import useAudioDownload from "./hooks/useAudioDownload";
 
 // Map used by connect logic for scenarios defined via the SDK.
 // Commented out for deployment - SDK not available
@@ -31,8 +32,6 @@ import { useHandleSessionHistory } from "@/app/hooks/useHandleSessionHistory";
 //   customerServiceRetail: customerServiceRetailScenario,
 //   chatSupervisor: chatSupervisorScenario,
 // };
-
-import useAudioDownload from "./hooks/useAudioDownload";
 
 function App() {
   const searchParams = useSearchParams()!;
