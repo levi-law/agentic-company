@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  PlayIcon,
   ReloadIcon,
   CheckCircledIcon,
   CrossCircledIcon,
@@ -38,7 +37,6 @@ const TasksView: React.FC<TasksViewProps> = ({ isExpanded, onTaskClick }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
-  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Fetch tasks from the backend
@@ -274,20 +272,8 @@ const TasksView: React.FC<TasksViewProps> = ({ isExpanded, onTaskClick }) => {
     return colors[department] || "bg-gray-100 text-gray-800";
   };
 
-  const handleRunTask = async (taskId: string) => {
-    console.log("Running task:", taskId);
-    // In a real implementation, this would trigger task execution
-    // For now, we'll just update the status
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === taskId ? { ...task, status: "in_progress" as const } : task
-      )
-    );
-  };
-
-  const toggleTaskExpansion = (taskId: string) => {
-    setExpandedTaskId((prev) => (prev === taskId ? null : taskId));
-  };
+  // Removed unused functions - handleRunTask and toggleTaskExpansion
+  // Task actions are now handled in the parent component (App.tsx)
 
   const handleTaskClick = (task: Task, e: React.MouseEvent) => {
     // If clicking on action buttons, don't navigate
@@ -391,7 +377,6 @@ const TasksView: React.FC<TasksViewProps> = ({ isExpanded, onTaskClick }) => {
           </div>
         ) : (
           filteredTasks.map((task) => {
-            const isExpanded = expandedTaskId === task.id;
             return (
               <div
                 key={task.id}
@@ -439,8 +424,6 @@ const TasksView: React.FC<TasksViewProps> = ({ isExpanded, onTaskClick }) => {
                       {task.estimatedHours}h
                     </span>
                   </div>
-                </div>
-
                 </div>
               </div>
             );
