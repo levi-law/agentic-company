@@ -11,6 +11,8 @@ import Events from "./components/Events";
 import BottomToolbar from "./components/BottomToolbar";
 import TasksView from "./components/TasksView";
 import TaskScreen from "./components/TaskScreen";
+import FloatingMenu from "./components/FloatingMenu";
+import NewTaskForm from "./components/NewTaskForm";
 
 // Types
 import { SessionStatus } from "@/app/types";
@@ -111,9 +113,8 @@ function App() {
 
   const [isEventsPaneExpanded, setIsEventsPaneExpanded] =
     useState<boolean>(true);
-  const [isTasksViewExpanded, setIsTasksViewExpanded] =
-    useState<boolean>(true);
   const [selectedTask, setSelectedTask] = useState<any | null>(null);
+  const [currentView, setCurrentView] = useState<"main" | "tasks" | "newTask" | "taskDetail">("main");
   const [userText, setUserText] = useState<string>("");
   const [isPTTActive, setIsPTTActive] = useState<boolean>(false);
   const [isPTTUserSpeaking, setIsPTTUserSpeaking] = useState<boolean>(false);
@@ -361,10 +362,12 @@ function App() {
 
   const handleTaskClick = (task: any) => {
     setSelectedTask(task);
+    setCurrentView("taskDetail");
   };
 
   const handleBackFromTask = () => {
     setSelectedTask(null);
+    setCurrentView("tasks");
   };
 
   const handleRunTask = (taskId: string) => {
@@ -383,6 +386,27 @@ function App() {
     }
   };
 
+  const handleTasksMenuClick = () => {
+    setCurrentView("tasks");
+    setSelectedTask(null);
+  };
+
+  const handleNewTaskMenuClick = () => {
+    setCurrentView("newTask");
+  };
+
+  const handleBackToMain = () => {
+    setCurrentView("main");
+    setSelectedTask(null);
+  };
+
+  const handleNewTaskSubmit = (taskData: any) => {
+    console.log("New task created:", taskData);
+    // In a real implementation, this would save to backend
+    // For now, just go back to tasks view
+    setCurrentView("tasks");
+  };
+
   useEffect(() => {
     const storedPushToTalkUI = localStorage.getItem("pushToTalkUI");
     if (storedPushToTalkUI) {
@@ -391,10 +415,6 @@ function App() {
     const storedLogsExpanded = localStorage.getItem("logsExpanded");
     if (storedLogsExpanded) {
       setIsEventsPaneExpanded(storedLogsExpanded === "true");
-    }
-    const storedTasksViewExpanded = localStorage.getItem("tasksViewExpanded");
-    if (storedTasksViewExpanded) {
-      setIsTasksViewExpanded(storedTasksViewExpanded === "true");
     }
     const storedAudioPlaybackEnabled = localStorage.getItem(
       "audioPlaybackEnabled"
@@ -411,10 +431,6 @@ function App() {
   useEffect(() => {
     localStorage.setItem("logsExpanded", isEventsPaneExpanded.toString());
   }, [isEventsPaneExpanded]);
-
-  useEffect(() => {
-    localStorage.setItem("tasksViewExpanded", isTasksViewExpanded.toString());
-  }, [isTasksViewExpanded]);
 
   useEffect(() => {
     localStorage.setItem(
@@ -557,18 +573,8 @@ function App() {
       </div>
 
       <div className="flex flex-1 gap-2 px-2 overflow-hidden relative">
-        {selectedTask ? (
-          // Task Detail Screen
-          <div className="flex-1 min-w-0">
-            <TaskScreen
-              task={selectedTask}
-              onBack={handleBackFromTask}
-              onRunTask={handleRunTask}
-              onUpdateStatus={handleUpdateTaskStatus}
-            />
-          </div>
-        ) : (
-          // Normal view with Transcript, Tasks, and Events
+        {currentView === "main" ? (
+          // Main view with Transcript and Events
           <>
             <Transcript
               userText={userText}
@@ -580,15 +586,57 @@ function App() {
               }
             />
 
-            <TasksView 
-              isExpanded={isTasksViewExpanded}
-              onTaskClick={handleTaskClick}
-            />
-
             <Events isExpanded={isEventsPaneExpanded} />
           </>
-        )}
+        ) : currentView === "tasks" ? (
+          // Tasks List View
+          <div className="flex-1 min-w-0">
+            <div className="h-full bg-white rounded-xl overflow-hidden flex flex-col">
+              <div className="px-6 py-4 bg-white border-b">
+                <button
+                  onClick={handleBackToMain}
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-3 transition-colors"
+                >
+                  <span>← Back to Main</span>
+                </button>
+                <h1 className="text-2xl font-bold text-gray-900">All Tasks</h1>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <TasksView 
+                  isExpanded={true}
+                  onTaskClick={handleTaskClick}
+                />
+              </div>
+            </div>
+          </div>
+        ) : currentView === "newTask" ? (
+          // New Task Form
+          <div className="flex-1 min-w-0">
+            <NewTaskForm
+              onBack={handleBackToMain}
+              onSubmit={handleNewTaskSubmit}
+            />
+          </div>
+        ) : currentView === "taskDetail" && selectedTask ? (
+          // Task Detail Screen
+          <div className="flex-1 min-w-0">
+            <TaskScreen
+              task={selectedTask}
+              onBack={handleBackFromTask}
+              onRunTask={handleRunTask}
+              onUpdateStatus={handleUpdateTaskStatus}
+            />
+          </div>
+        ) : null}
       </div>
+
+      {/* Floating Menu - only show on main view */}
+      {currentView === "main" && (
+        <FloatingMenu
+          onTasksClick={handleTasksMenuClick}
+          onNewTaskClick={handleNewTaskMenuClick}
+        />
+      )}
 
       <BottomToolbar
         sessionStatus={sessionStatus}
@@ -600,8 +648,6 @@ function App() {
         handleTalkButtonUp={handleTalkButtonUp}
         isEventsPaneExpanded={isEventsPaneExpanded}
         setIsEventsPaneExpanded={setIsEventsPaneExpanded}
-        isTasksViewExpanded={isTasksViewExpanded}
-        setIsTasksViewExpanded={setIsTasksViewExpanded}
         isAudioPlaybackEnabled={isAudioPlaybackEnabled}
         setIsAudioPlaybackEnabled={setIsAudioPlaybackEnabled}
         codec={urlCodec}
