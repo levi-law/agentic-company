@@ -37,7 +37,7 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
               setIsLoading(false);
               return;
             }
-          } catch (err) {
+          } catch {
             console.warn('[Session] Failed to restore session, creating new one');
           }
         }
