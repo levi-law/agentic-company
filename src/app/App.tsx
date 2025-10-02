@@ -23,6 +23,7 @@ import { useAuth } from "@/app/contexts/AuthContext";
 import { useSessionPersistence } from "@/app/hooks/useSessionPersistence";
 import { useHandleSessionHistory } from "@/app/hooks/useHandleSessionHistory";
 import useAudioDownload from "./hooks/useAudioDownload";
+import { SessionStatus } from "@/app/types";
 
 // Map used by connect logic for scenarios defined via the SDK.
 // Commented out for deployment - SDK not available
@@ -56,7 +57,7 @@ function App() {
     addTranscriptMessage,
     addTranscriptBreadcrumb,
   } = useTranscript();
-  const { logClientEvent, logServerEvent, onTasksGenerated, setSaveEventCallback } = useEvent();
+  const { logClientEvent, onTasksGenerated, setSaveEventCallback } = useEvent();
   const { addTasks } = useTasks();
 
   const [selectedAgentName, setSelectedAgentName] = useState<string>("");
@@ -85,14 +86,15 @@ function App() {
   // Ref to identify whether the latest agent switch came from an automatic handoff
   const handoffTriggeredRef = useRef(false);
 
-  const sdkAudioElement = React.useMemo(() => {
-    if (typeof window === 'undefined') return undefined;
-    const el = document.createElement('audio');
-    el.autoplay = true;
-    el.style.display = 'none';
-    document.body.appendChild(el);
-    return el;
-  }, []);
+  // SDK audio element - commented out for deployment
+  // const sdkAudioElement = React.useMemo(() => {
+  //   if (typeof window === 'undefined') return undefined;
+  //   const el = document.createElement('audio');
+  //   el.autoplay = true;
+  //   el.style.display = 'none';
+  //   document.body.appendChild(el);
+  //   return el;
+  // }, []);
 
   // Attach SDK audio element once it exists (after first render in browser)
   // SDK-related code commented out for deployment
@@ -116,12 +118,13 @@ function App() {
   const connect = () => {};
   const disconnect = () => {};
   const interrupt = () => {};
-  const mute = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const mute = (enabled: boolean) => {};
   
   // Use these to avoid unused variable warnings
   console.log('Connection handlers ready:', { connect, disconnect, interrupt, mute });
 
-  const [sessionStatus, setSessionStatus] = useState<string>("DISCONNECTED");
+  const [sessionStatus, setSessionStatus] = useState<SessionStatus>("DISCONNECTED");
 
   const [isEventsPaneExpanded, setIsEventsPaneExpanded] =
     useState<boolean>(true);
@@ -222,21 +225,22 @@ function App() {
     }
   }, [isPTTActive]);
 
-  const fetchEphemeralKey = async (): Promise<string | null> => {
-    logClientEvent({ url: "/session" }, "fetch_session_token_request");
-    const tokenResponse = await fetch("/api/session");
-    const data = await tokenResponse.json();
-    logServerEvent(data, "fetch_session_token_response");
+  // Ephemeral key fetching - commented out for deployment
+  // const fetchEphemeralKey = async (): Promise<string | null> => {
+  //   logClientEvent({ url: "/session" }, "fetch_session_token_request");
+  //   const tokenResponse = await fetch("/api/session");
+  //   const data = await tokenResponse.json();
+  //   logServerEvent(data, "fetch_session_token_response");
 
-    if (!data.client_secret?.value) {
-      logClientEvent(data, "error.no_ephemeral_key");
-      console.error("No ephemeral key provided by the server");
-      setSessionStatus("DISCONNECTED");
-      return null;
-    }
+  //   if (!data.client_secret?.value) {
+  //     logClientEvent(data, "error.no_ephemeral_key");
+  //     console.error("No ephemeral key provided by the server");
+  //     setSessionStatus("DISCONNECTED");
+  //     return null;
+  //   }
 
-    return data.client_secret.value;
-  };
+  //   return data.client_secret.value;
+  // };
 
   const connectToRealtime = async () => {
     // SDK connection commented out for deployment
@@ -338,9 +342,9 @@ function App() {
     interrupt();
 
     try {
-      sendUserText(userText.trim());
+      sendSimulatedUserMessage(userText.trim());
     } catch (err) {
-      console.error('Failed to send via SDK', err);
+      console.error('Failed to send message', err);
     }
 
     setUserText("");

@@ -171,8 +171,6 @@ export function useSessionPersistence({ agentConfig, activeAgent, enabled = true
         initializationInProgress.current = false;
       }
     };
-    
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled]); // Only re-run if enabled changes
 
   // Update active agent when it changes
